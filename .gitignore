@@ -1,0 +1,6 @@
+**.secret
+.venv
+**.pyc
+.vscode/**
+!.vscode/launch.json
+!.vscode/tasks.json
