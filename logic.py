@@ -117,7 +117,7 @@ def say(state: Bot_state, user: User_state, command_text: str):
             for stock in state.stocks:
                 cantidad = state.stocks[stock].amount
                 unidad = state.stocks[stock].unit
-                msg += f"\n{stock.capitalize()} {cantidad}{unidad}"
+                inventario += f"\n{stock.capitalize()} {cantidad}{unidad}"
             return inventario
 
         case 'combustible':
