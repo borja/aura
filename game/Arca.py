@@ -1,5 +1,5 @@
 class Health:
-    is_submarine_autodestructing: bool = False
+    is_arca_autodestructing: bool = False
     temperatura_interior: int = 23
     soporte_vital: int = 100
     cellar: int = 100
