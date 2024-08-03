@@ -13,12 +13,13 @@ if __name__ == '__main__':
     with open("token.secret", mode="r", encoding="utf-8") as token_file:
         TOKEN: Final = token_file.read()
 
-    # Config
+    # Configuration settings
     with open("settings.json", mode="r", encoding="utf-8") as config_file:
         CONFIG_JSON: Final = config_file.read()
     settings = Settings(json.loads(CONFIG_JSON))
 
-    # Texts
+    # Load Markdown Texts
     texts = Texts("assets/texts")
 
+    # Main Object
     tel = Telegram(TOKEN, settings, texts)
