@@ -58,9 +58,9 @@ async def handle_message(state: Bot_state, update: Update, context: ContextTypes
         rest = clean_text[re_match.end(0)+1:]
 
     match command:
-        case "ayuda":
+        case "ayuda" | "help":
             await update.message.reply_text(help())
-        case "haz" | "ejecuta":
+        case "haz" | "ejecuta" | "orden":
             await update.message.reply_text(run(state,user,rest))
         case "dime" | "imprime" | "informa" | "muestra":
             await update.message.reply_text(say(state,user,rest))

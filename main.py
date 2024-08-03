@@ -12,12 +12,12 @@ if __name__ == '__main__':
     token_file = open("token.secret", mode="r", encoding="utf-8")
     TOKEN: Final = token_file.read()
     token_file.close()
+
     # Config
     config_file = open("settings.json", mode="r", encoding="utf-8")
-    configJson: Final = config_file.read()
+    CONFIG_JSON: Final = config_file.read()
     config_file.close()
-    settingsDict = json.loads(configJson)
+    settingsDict = json.loads(CONFIG_JSON)
     settings = Settings(settingsDict)
 
     tel = Telegram(TOKEN, settings)
-

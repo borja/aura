@@ -39,16 +39,16 @@ def run(state: Bot_state, user: User_state, command_text: str):
     args = command_text[re_match.end(0)+1:].split(' ')
 
     match command:
-        case 'autodestruccion':
-            if state.arca.health.is_submarine_autodestructing == False:
-                state.arca.health.is_submarine_autodestructing = True
+        case 'autodestrucción' | 'autodestruccion':
+            if state.arca.health.is_arca_autodestructing is False:
+                state.arca.health.is_arca_autodestructing = True
                 return 'Autodestrucción programada para dentro de 30 minutos'
             else:
                 return 'Autodestrucción ya había sido iniciada'
 
         case 'abortar':
-            if state.arca.health.is_submarine_autodestructing == True:
-                state.arca.health.is_submarine_autodestructing = False
+            if state.arca.health.is_arca_autodestructing:
+                state.arca.health.is_arca_autodestructing = False
                 return 'Autodestrucción abortada'
             else:
                 return 'No existe una secuencia de autodestrucción inicializada.'

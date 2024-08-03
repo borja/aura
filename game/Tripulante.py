@@ -1,28 +1,36 @@
-
-
 class Atributos:
     ciencia: int
     constitucion: int
     mecanica: int
     pelea: int
-    prestigio: int
+    credibilidad: int
     programacion: int
 
-    def __init__(self, ciencia: int, constitucion: int, mecanica: int, pelea: int, prestigio: int, programacion: int):
-        self.ciencia = ciencia
-        self.constitucion = constitucion
-        self.mecanica = mecanica
-        self.pelea = pelea
-        self.prestigio = prestigio
-        self.programacion = programacion
+    def __init__(self, stats: dict):
+        self.ciencia = stats.ciencia
+        self.constitucion = stats.constitucion
+        self.mecanica = stats.mecanica
+        self.pelea = stats.pelea
+        self.credibilidad = stats.prestigio
+        self.programacion = stats.programacion
 
 class Tripulante:
     uuid: str
     name: str
-    saludable: bool
+    rango: str
+    vida: str
+    prestigio: int
+    vida: int
+    estado: str
+    is_enfermo: bool
     atributos: Atributos
 
-    def __init__(self, uuid: str, saludable: bool, attrs: Atributos):
+    def __init__(self, uuid: str, name: str, rango: str, attrs: Atributos):
         self.uuid = uuid
-        self.saludable = saludable
+        self.name = name
+        self.rango = rango
+        self.vida = 3
+        self.estado = "Sano"
+        self.is_enfermo = False
         self.attrs = attrs
+        self.prestigio = attrs.credibilidad
