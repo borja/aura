@@ -1,46 +1,25 @@
 import re
 
-from texts import HELP_TEXT, TRIPULANTES_TEXT, SALAS_TEXT, LEYES_TEXT, NORMAS_TEXT
+from game.Arca import Arca
+from game.Tripulante import Tripulante
+from texts.texts import HELP_TEXT, TRIPULANTES_TEXT, SALAS_TEXT, LEYES_TEXT, NORMAS_TEXT
+from typing import Optional
 
 class User_state:
     id: int
-    name: str = "guest"
-    rol: str = "guest"
+    avatar: Optional[Tripulante]
 
     def __init__(self, id: int):
         self.id = id
 
-class Health:
-    is_submarine_autodestructing: bool = False
-    temperatura_interior: int = 23
-    soporte_vital: int = 100
-    cellar: int = 100
-    reactor: int = 100
-    exterior: int = 100
-    circuits: int = 100
-    boiler: int = 100
-    gardens: int = 100
-    sleeping_quarters: int = 100
-
-class Combustible:
-    capacidad: int = 100
-
-class Stock:
-    amount: float = 0
-    unit: str = "kg"
-
-    def __init__(self, amount: float, unit: str):
-        self.amount = amount
-        self.unit = unit
-
 class Bot_state:
-    health: Health = Health()
-    stocks: dict[str, Stock]= {
-        'algas': Stock(100, "kg"),
-        'proteinas': Stock(10, "kg"),
-        'pesca': Stock(4, "kg"),
-    }
+    id: str
+    arca: Arca
     users: list[User_state] = []
+
+    def __init__(self, bot_id, arca):
+        self.id = bot_id
+        self.arca = arca
 
     def user(self, id: int):
         for user in self.users:
@@ -61,22 +40,22 @@ def run(state: Bot_state, user: User_state, command_text: str):
 
     match command:
         case 'autodestruccion':
-            if state.health.is_submarine_autodestructing == False:
-                state.health.is_submarine_autodestructing = True
+            if state.arca.health.is_submarine_autodestructing == False:
+                state.arca.health.is_submarine_autodestructing = True
                 return 'Autodestrucción programada para dentro de 30 minutos'
             else:
                 return 'Autodestrucción ya había sido iniciada'
 
         case 'abortar':
-            if state.health.is_submarine_autodestructing == True:
-                state.health.is_submarine_autodestructing = False
+            if state.arca.health.is_submarine_autodestructing == True:
+                state.arca.health.is_submarine_autodestructing = False
                 return 'Autodestrucción abortada'
             else:
                 return 'No existe una secuencia de autodestrucción inicializada.'
 
         case 'consumir':
-            state.stocks["algas"].amount = state.stocks["algas"].amount - 2
-            return 'Se han consumido 2kg de algas'
+            state.arca.stocks["algasugos"].amount = state.arca.stocks["algasugos"].amount - 1
+            return 'Se han consumido 1 algasugo'
 
     return f"El comando <{command}> no está implementado en la interfaz AURA"
 
@@ -103,20 +82,20 @@ def say(state: Bot_state, user: User_state, command_text: str):
         case 'estado':
             return f"""
                 ESTADO DEL ARCA\n
-                - Bodega {state.health.cellar}%\n
-                - Reactor {state.health.reactor}%\n
-                - Exterior {state.health.exterior}%\n
-                - Sistema eléctrico {state.health.circuits}%\n
-                - Caldera {state.health.boiler}%\n
-                - Huertos {state.health.gardens}%\n
-                - Cabinas tripulantes {state.health.sleeping_quarters}%
+                - Bodega {state.arca.health.cellar}%\n
+                - Reactor {state.arca.health.reactor}%\n
+                - Exterior {state.arca.health.exterior}%\n
+                - Sistema eléctrico {state.arca.health.circuits}%\n
+                - Caldera {state.arca.health.boiler}%\n
+                - Huertos {state.arca.health.gardens}%\n
+                - Cabinas tripulantes {state.arca.health.sleeping_quarters}%
             """
 
         case 'inventario':
             inventario = "INVENTARIO DE SUMINISTROS"
-            for stock in state.stocks:
-                cantidad = state.stocks[stock].amount
-                unidad = state.stocks[stock].unit
+            for stock in state.arca.stocks:
+                cantidad = state.arca.stocks[stock].amount
+                unidad = state.arca.stocks[stock].unit
                 inventario += f"\n{stock.capitalize()} {cantidad}{unidad}"
             return inventario
 
