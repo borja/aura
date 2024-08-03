@@ -18,11 +18,11 @@ class Texts:
         self.reload()
 
     def reload(self):
-        files = glob(f"{self.path}/**.md")
+        files = glob.glob(f"{self.path}/**.md")
         for file in files:
-            if isfile(basename) == False:
+            if isfile(file) == False:
                 continue
-            name = basename(file)
+            name = basename(file).replace(".md","")
             match name:
                 case "ayuda":
                     self.txt_ayuda = open(file, mode="r", encoding="utf-8").read()

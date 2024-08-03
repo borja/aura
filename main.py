@@ -4,6 +4,7 @@ import json
 
 from infra.Settings import Settings
 from infra.Telegram import Telegram
+from infra.Texts import Texts
 
 if __name__ == '__main__':
     print(" 🤖 AURA's systems are loading")
@@ -20,4 +21,7 @@ if __name__ == '__main__':
     settingsDict = json.loads(CONFIG_JSON)
     settings = Settings(settingsDict)
 
-    tel = Telegram(TOKEN, settings)
+    # Texts
+    texts = Texts("assets/texts")
+
+    tel = Telegram(TOKEN, settings, texts)

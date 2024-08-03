@@ -2,8 +2,8 @@ import re
 
 from game.Arca import Arca
 from game.Tripulante import Tripulante
-from texts.texts import HELP_TEXT, TRIPULANTES_TEXT, SALAS_TEXT, LEYES_TEXT, NORMAS_TEXT
 from typing import Optional
+from infra.Texts import Texts
 
 class User_state:
     id: int
@@ -14,12 +14,14 @@ class User_state:
 
 class Bot_state:
     id: str
+    txts: Texts
     arca: Arca
     users: list[User_state] = []
 
-    def __init__(self, bot_id, arca):
+    def __init__(self, bot_id: str, arca: Arca, txts: Texts):
         self.id = bot_id
         self.arca = arca
+        self.txts = txts
 
     def user(self, id: int):
         for user in self.users:
@@ -30,8 +32,8 @@ class Bot_state:
         self.users.append(new_user)
         return new_user
 
-def help():
-    return HELP_TEXT
+def help(state: Bot_state, user: User_state):
+    return state.txts.txt_ayuda
 
 def run(state: Bot_state, user: User_state, command_text: str):
     re_match = re.search("^[^ ]+", command_text.lower())
@@ -68,16 +70,16 @@ def say(state: Bot_state, user: User_state, command_text: str):
     match command:
 
         case 'tripulación' | 'tripulantes':
-            return TRIPULANTES_TEXT
+            return state.txts.txt_tripulantes
 
         case 'salas' | 'dependencias' | 'aforo':
-            return SALAS_TEXT
+            return state.txts.txt_salas
 
         case 'leyes' | 'LGJ6' :
-            return LEYES_TEXT
+            return state.txts.txt_leyes
 
         case 'normas' | 'normativa' | 'reglas' | 'reglamento' :
-            return NORMAS_TEXT
+            return state.txts.txt_normas
 
         case 'estado':
             return f"""

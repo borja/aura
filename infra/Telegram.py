@@ -9,15 +9,15 @@ import re
 from game.Arca import Arca
 from infra.Settings import Settings
 from game.core import Bot_state, say, run, help
-from texts.texts import WELCOME, SALUDO
+from infra.Texts import Texts
 
 class Telegram:
     token: str
-    def __init__(self, token: str, config: Settings):
+    def __init__(self, token: str, config: Settings, texts: Texts):
         print(" 🤖 AURA assistant is initializing")
         self.token = token
         arca = Arca()
-        state = Bot_state(config.bot_id, arca)
+        state = Bot_state(config.bot_id, arca, texts)
 
         app = Application.builder().token(token).build()
 
@@ -30,7 +30,7 @@ class Telegram:
         app.run_polling(poll_interval=1)
 
 async def start_command(state: Bot_state, update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(WELCOME)
+    await update.message.reply_text(state.txts.txt_welcome)
 
 async def help_command(state: Bot_state, update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = state.user(context._chat_id)
@@ -59,13 +59,13 @@ async def handle_message(state: Bot_state, update: Update, context: ContextTypes
 
     match command:
         case "ayuda" | "help":
-            await update.message.reply_text(help())
+            await update.message.reply_markdown(help(state, user))
         case "haz" | "ejecuta" | "orden":
-            await update.message.reply_text(run(state,user,rest))
+            await update.message.reply_markdown(run(state,user,rest))
         case "dime" | "imprime" | "informa" | "muestra":
-            await update.message.reply_text(say(state,user,rest))
+            await update.message.reply_markdown(say(state,user,rest))
         case "hola" | "saludos" | "saludo":
-            await update.message.reply_text(SALUDO)
+            await update.message.reply_markdown(state.txts.txt_saludo)
         case _:
             print(f"Invalid command request: {command}")
             await update.message.reply_text(f"No existe el comando \"{command}\"")
