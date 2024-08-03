@@ -1,7 +1,5 @@
 from typing import Final
 
-BOT_USERNAME: Final = '@aurainterface_bot'
-
 WELCOME: Final = """
 ```<b>Saludos tripulante.</b>```\n
     Estás entrando al sistema de asistente personal **AURA**.\n
