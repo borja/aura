@@ -10,16 +10,13 @@ if __name__ == '__main__':
     print(" 🤖 AURA's systems are loading")
 
     # Token management
-    token_file = open("token.secret", mode="r", encoding="utf-8")
-    TOKEN: Final = token_file.read()
-    token_file.close()
+    with open("token.secret", mode="r", encoding="utf-8") as token_file:
+        TOKEN: Final = token_file.read()
 
     # Config
-    config_file = open("settings.json", mode="r", encoding="utf-8")
-    CONFIG_JSON: Final = config_file.read()
-    config_file.close()
-    settingsDict = json.loads(CONFIG_JSON)
-    settings = Settings(settingsDict)
+    with open("settings.json", mode="r", encoding="utf-8") as config_file:
+        CONFIG_JSON: Final = config_file.read()
+    settings = Settings(json.loads(CONFIG_JSON))
 
     # Texts
     texts = Texts("assets/texts")

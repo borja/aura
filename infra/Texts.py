@@ -20,13 +20,13 @@ class Texts:
     def reload(self):
         files = glob.glob(f"{self.path}/**.md")
         for file in files:
-            if isfile(file) == False:
+            if isfile(file) is False:
                 continue
             name = basename(file).replace(".md","")
             match name:
                 case "ayuda":
                     self.txt_ayuda = open(file, mode="r", encoding="utf-8").read()
-                case "leeys":
+                case "leyes":
                     self.txt_leyes = open(file, mode="r", encoding="utf-8").read()
                 case "normas":
                     self.txt_normas = open(file, mode="r", encoding="utf-8").read()

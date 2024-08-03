@@ -1,4 +1,4 @@
-  Normas de obligado cumplimiento en ARCA
+**Normas de obligado cumplimiento en ARCA**
 
   1. Cumplirás con tu tarea asignada con la mayor diligencia posible.
   2. No atentarás voluntaria o involuntariamente contra el estado de preservación de ARCA.
