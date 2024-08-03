@@ -40,7 +40,7 @@ def run(state: Bot_state, user: User_state, command_text: str):
 
     match command:
         case 'autodestrucción' | 'autodestruccion':
-            if state.arca.health.is_arca_autodestructing == False:
+            if state.arca.health.is_arca_autodestructing is False:
                 state.arca.health.is_arca_autodestructing = True
                 return 'Autodestrucción programada para dentro de 30 minutos'
             else:
