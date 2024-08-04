@@ -4,14 +4,14 @@
 \* \(2\) **Cuerpo Militar**\
     \* Irene\
     \* Nóbel\
-\* \(5\) **Cuerpo Ciencia**\
+\* \(6\) **Cuerpo Ciencia**\
     \* Anastasia\
     \* Reyes\
     \* Fran\
     \* Bego\
     \* Rubén\
-\* \(4\) **Cuerpo Ingeniería**\
+    \* Edu\
+\* \(3\) **Cuerpo Ingeniería**\
     \* Antón\
     \* Dan\
-    \* Edu\
     \* Nora

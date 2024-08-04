@@ -1,20 +1,20 @@
-from os import read
-from typing import Final
+import re
+
 from functools import partial
+from termcolor import colored
 from telegram import Update
 from telegram.constants import ParseMode
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
-import re
 
-from game.Arca import Arca
 from infra.Settings import Settings
-from game.core import Bot, say, run, help, start
+from game.core import Bot, say, run, help, start, scan
 from infra.Texts import Texts
+from game.Arca import Arca
 
 class Telegram:
     token: str
     def __init__(self, token: str, config: Settings, texts: Texts):
-        print(" 🤖 AURA assistant is initializing")
+        print(colored(' 🤖 AURA assistant is initializing','green'))
         self.token = token
         arca = Arca()
         state = Bot(config.bot_id, arca, texts)
@@ -26,7 +26,7 @@ class Telegram:
         app.add_handler(MessageHandler(filters.TEXT, partial(handle_message, state)))
         app.add_error_handler(partial(handle_error, state))
 
-        print(" 🤖 AURA assistant is ready for duty")
+        print(colored(' 🤖 AURA assistant is ready for duty','green'))
         app.run_polling(poll_interval=1)
 
 async def start_command(state: Bot, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -65,11 +65,17 @@ async def handle_message(state: Bot, update: Update, context: ContextTypes.DEFAU
             await update.message.reply_text(run(state,user,rest), parse_mode=ParseMode.MARKDOWN_V2)
         case "dime" | "imprime" | "informa" | "muestra":
             await update.message.reply_text(say(state,user,rest), parse_mode=ParseMode.MARKDOWN_V2)
+        case "scan":
+            await update.message.reply_text(scan(state,user), parse_mode=ParseMode.MARKDOWN_V2)
         case "hola" | "saludos" | "saludo":
             await update.message.reply_text(state.txts.txt_saludo, parse_mode=ParseMode.MARKDOWN_V2)
         case _:
-            print(f"Invalid command request: {command}")
+            print(colored(f" ⚠️ - Invalid command request: {command}",'yellow'))
             await update.message.reply_text(f"No existe el comando \"{command}\"")
 
 async def handle_error(state: Bot, update: Update, context: ContextTypes.DEFAULT_TYPE):
-    print(f"Update {update} caused and error: {context.error}")
+    print(
+        colored(' ❌ ERROR caused by context: ','red'),
+        colored(context.error, 'grey'),
+        colored(update,'grey')
+    )
