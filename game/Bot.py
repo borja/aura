@@ -1,8 +1,8 @@
 import re
 
+from typing import Optional
 from game.Arca import Arca
 from game.Tripulante import Tripulante
-from typing import Optional
 from game.User import User
 from infra.Texts import Texts
 

@@ -9,8 +9,8 @@ from telegram.ext import Application, CommandHandler, MessageHandler, filters, C
 from game.User import User
 from infra.Loader import Loader
 from infra.Settings import Settings
-from game.core import Bot, say, run, help, start, scan
 from infra.Texts import Texts
+from game.core import Bot, say, run, help, start, scan
 from game.Arca import Arca
 
 class Telegram:
@@ -97,6 +97,6 @@ async def handle_error(state: Bot, update: Update, context: ContextTypes.DEFAULT
     )
 
 def clean_start_command(match: re.Match[str]):
-    if( match.end(0) - match.start(0) > 1):
+    if match.end(0) - match.start(0) > 1 :
         return "_"
     return " "

@@ -94,14 +94,6 @@ default_load = {
         "health": {
             "is_arca_autodestructing": False,
             "temperatura_interior": 23,
-            "soporte_vital": 100,
-            "cellar": 100,
-            "reactor": 100,
-            "exterior": 100,
-            "circuits": 100,
-            "boiler": 100,
-            "gardens": 100,
-            "sleeping_quarters": 100
         },
         "stocks": {
             "algolosinas": [32,"u"]
@@ -135,14 +127,6 @@ class Loader:
         health_dict = arca_dict.get("health", default_load["arca"]["health"])
         bot.arca.health.is_arca_autodestructing = health_dict.get("is_arca_autodestructing", default_load["arca"]["health"]["is_arca_autodestructing"])
         bot.arca.health.temperatura_interior = health_dict.get("temperatura_interior", default_load["arca"]["health"]["temperatura_interior"])
-        bot.arca.health.soporte_vital = health_dict.get("soporte_vital", default_load["arca"]["health"]["soporte_vital"])
-        bot.arca.health.cellar = health_dict.get("cellar", default_load["arca"]["health"]["cellar"])
-        bot.arca.health.reactor = health_dict.get("reactor", default_load["arca"]["health"]["reactor"])
-        bot.arca.health.exterior = health_dict.get("exterior", default_load["arca"]["health"]["exterior"])
-        bot.arca.health.circuits = health_dict.get("circuits", default_load["arca"]["health"]["circuits"])
-        bot.arca.health.boiler = health_dict.get("boiler", default_load["arca"]["health"]["boiler"])
-        bot.arca.health.gardens = health_dict.get("gardens", default_load["arca"]["health"]["gardens"])
-        bot.arca.health.sleeping_quarters = health_dict.get("sleeping_quarters", default_load["arca"]["health"]["sleeping_quarters"])
 
         stocks_dict: dict[str, list[any]] = arca_dict.get("stocks", default_load["arca"]["stocks"])
         bot.arca.stocks = {}

@@ -1,7 +1,7 @@
 import re
 
-from game.Tripulante import Tripulante
 from typing import Optional
+from game.Tripulante import Tripulante
 
 class User:
     id: int
