@@ -71,7 +71,7 @@ async def handle_message(state: Bot, update: Update, context: ContextTypes.DEFAU
         command = re_match[0]
         rest = clean_text[re_match.end(0)+1:]
 
-    handle_text_command(state, user, update, context, command, rest)
+    await handle_text_command(state, user, update, context, command, rest)
 
 async def handle_text_command(state: Bot, user: User, update: Update, context: ContextTypes.DEFAULT_TYPE, command: str, rest: str):
     match command:
