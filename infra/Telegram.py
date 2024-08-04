@@ -37,11 +37,12 @@ class Telegram:
 async def start_command(state: Bot, update: Update, context: ContextTypes.DEFAULT_TYPE):
     code: str = update.message.text.replace("/start ", "")
     user = state.user(context._user_id)
-    if( code != ""):
+    if code != "":
         code = re.sub("__?", clean_start_command, code)
         re_match = re.search("^[^ ]+", code.lower())
         command = re_match[0]
         rest = code[re_match.end(0)+1:]
+        print(colored(f" 🔎 SCAN CODE command received: {command}, with value: {rest}","blue"))
         await handle_text_command(state, user, update, context, command, rest)
     else:
         await update.message.reply_text(start(state, user, code), parse_mode=ParseMode.MARKDOWN_V2)
@@ -82,7 +83,7 @@ async def handle_text_command(state: Bot, user: User, update: Update, context: C
         case "dime" | "imprime" | "informa" | "muestra":
             await update.message.reply_text(say(state,user,rest), parse_mode=ParseMode.MARKDOWN_V2)
         case "scan":
-            await update.message.reply_text(scan(state,user), parse_mode=ParseMode.MARKDOWN_V2)
+            await update.message.reply_text(scan(state,user,rest), parse_mode=ParseMode.MARKDOWN_V2)
         case "hola" | "saludos" | "saludo":
             await update.message.reply_text(state.txts.txt_saludo, parse_mode=ParseMode.MARKDOWN_V2)
         case _:

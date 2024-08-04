@@ -104,6 +104,10 @@ def say(state: Bot, user: User, command_text: str):
             print(colored(f" ⚠️ - Invalid information request: {command}",'yellow'))
             return f"No existe información registrada para la propiedad: {command}"
 
-def scan(state: Bot, user: Bot):
-    print(colored(" ⚠️ WARNING: SCAN feature is not implemented",'orange'))
-    return state.txts.txt_scan
+def scan(state: Bot, user: Bot,  command_text: str):
+    re_match = re.search("^[^ ]+", command_text.lower())
+    command = re_match[0]
+    args = command_text[re_match.end(0)+1:].split(' ')
+
+    print(colored(f" ⚠️ WARNING: SCAN feature for command {command} is not implemented",'yellow'))
+    return " ⚠️ WARNING: Esta feature no ha sido implementada"
