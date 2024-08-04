@@ -29,7 +29,7 @@ class Stock:
 
 class Arca:
     health: Health = Health()
-    fuel: Combustible = Combustible()
+    fuel: Combustible = Combustible(100)
     stocks: dict[str, Stock]= {
         'algolosina': Stock(32, "u"),
     }
