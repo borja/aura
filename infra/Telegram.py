@@ -6,6 +6,7 @@ from telegram import Update
 from telegram.constants import ParseMode
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
+from game.User import User
 from infra.Loader import Loader
 from infra.Settings import Settings
 from game.core import Bot, say, run, help, start, scan
@@ -34,17 +35,25 @@ class Telegram:
         app.run_polling(poll_interval=1)
 
 async def start_command(state: Bot, update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user = state.user(context._chat_id)
-    await update.message.reply_text(start(state, user), parse_mode=ParseMode.MARKDOWN_V2)
+    code: str = update.message.text.replace("/start ", "")
+    user = state.user(context._user_id)
+    if( code != ""):
+        code = re.sub("__?", clean_start_command, code)
+        re_match = re.search("^[^ ]+", code.lower())
+        command = re_match[0]
+        rest = code[re_match.end(0)+1:]
+        await handle_text_command(state, user, update, context, command, rest)
+    else:
+        await update.message.reply_text(start(state, user, code), parse_mode=ParseMode.MARKDOWN_V2)
 
 async def help_command(state: Bot, update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user = state.user(context._chat_id)
+    user = state.user(context._user_id)
     await update.message.reply_text(help(state, user), parse_mode=ParseMode.MARKDOWN_V2)
 
 async def handle_message(state: Bot, update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_type: str = update.message.chat.type
     text: str = update.message.text
-    user = state.user(context._chat_id)
+    user = state.user(context._user_id)
 
     command = ''
     rest = ''
@@ -62,9 +71,12 @@ async def handle_message(state: Bot, update: Update, context: ContextTypes.DEFAU
         command = re_match[0]
         rest = clean_text[re_match.end(0)+1:]
 
+    handle_text_command(state, user, update, context, command, rest)
+
+async def handle_text_command(state: Bot, user: User, update: Update, context: ContextTypes.DEFAULT_TYPE, command: str, rest: str):
     match command:
         case "ayuda" | "help":
-            await update.message.reply_text(help(state, user), parse_mode=ParseMode.MARKDOWN_V2)
+            await update.message.reply_text(help(state,user), parse_mode=ParseMode.MARKDOWN_V2)
         case "haz" | "ejecuta" | "orden":
             await update.message.reply_text(run(state,user,rest), parse_mode=ParseMode.MARKDOWN_V2)
         case "dime" | "imprime" | "informa" | "muestra":
@@ -83,3 +95,8 @@ async def handle_error(state: Bot, update: Update, context: ContextTypes.DEFAULT
         colored(context.error, 'grey'),
         colored(update,'grey')
     )
+
+def clean_start_command(match: re.Match[str]):
+    if( match.end(0) - match.start(0) > 1):
+        return "_"
+    return " "
