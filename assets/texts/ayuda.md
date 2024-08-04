@@ -13,12 +13,15 @@ Estas son las funciones que puedes realizar:
 \- *Autodestruccion*: Empieza la secuencia de autodestrucción del submarino, sentíamos que faltaba algo si no teníamos esta función\.\
 \- *Cancelamiento*: Creemos en las segundas oportudinades\. Esto aborta la autodestrucción del submarino\.
 
+*Scan*:\
+\- _\<Tripulante\>_: Realiza un scanner de un tripulante\.\
+
 Ejemplos:\
 \- Dime estado\
 \- Dime normas\
 \- Dime tripulantes\
 \- Haz autodestrucción\
-\- Haz Cancelamiento
-
+\- Haz Cancelamiento\
+\- Scan Nora\
 
 > Ten en cuenta que la mayúsculas y minúsculas son intercambiables

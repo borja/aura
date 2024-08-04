@@ -1,6 +1,7 @@
 import re
 
 from typing import Optional
+from termcolor import colored
 from game.Arca import Arca
 from game.Tripulante import Tripulante
 from infra.Texts import Texts
@@ -56,11 +57,12 @@ def run(state: Bot_state, user: User_state, command_text: str):
                 return 'No existe una secuencia de autodestrucción inicializada.'
 
         case 'consumir':
-            state.arca.stocks["algasugos"].amount = state.arca.stocks["algasugos"].amount - 1
-            return 'Se han consumido 1 algasugo'
+            state.arca.stocks["algolosina"].amount = state.arca.stocks["algolosina"].amount - 1
+            return 'Se han consumido 1 algolosina'
 
-    return f"El comando <{command}> no está implementado en la interfaz AURA"
-
+        case _:
+            print(colored(f"⚠️ - Invalid command request: {command}",'yellow'))
+            return f"El comando <{command}> no está implementado en la interfaz AURA"
 
 def say(state: Bot_state, user: User_state, command_text: str):
     re_match = re.search("^[^ ]+", command_text.lower())
@@ -108,5 +110,5 @@ def say(state: Bot_state, user: User_state, command_text: str):
             return f"No existe información registrada para la propiedad: {command}."
 
 def scan(state: Bot_state, user: User_state):
-    return state.txts.txt_ayuda
+    return state.txts.txt_scan
 
