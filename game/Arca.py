@@ -31,7 +31,67 @@ class Sala:
         self.nombre = nombre
         self.aforo = aforo
         self.estado = 100
-        self.permisos = {'ciencia': True, 'ingeniería': True, 'militares': True}
+        self.permisos = {
+            'ciencia': True,
+            'ingeniería': True,
+            'militares': True
+        }
+
+class Esclusa(Sala):
+    is_output_open: bool = False
+    is_input_open: bool = False
+
+    def status(self):
+        if self.is_input_open is True:
+            return 'INPUT'
+        elif self.is_output_open is True:
+            return 'OUPUT'
+        else:
+            return 'NULL'
+
+    def open_input(self):
+        if self.is_input_open is True:
+            print(colored(" ⚠️ - ESCLUSA-INPUT is already OPEN",'yellow'))
+            return '⚠️ La esclusa INPUT ya estaba abierta'
+        else:
+            if self.is_output_open is True:
+                print(colored(" ⚠️ - ESCLUSA-OUTPUT is OPEN, cannot open INPUT",'yellow'))
+                return '🚫 No se ha podido realizar: La esclusa OUTPUT está abierta'
+            else:
+                self.is_input_open = True
+                print(colored(' 🤖 ESCLUSA: input abierto','green'))
+                return '↪️ ESCLUSA INPUT ABIERTA'
+        
+    def open_output(self):
+        if self.is_output_open is True:
+            print(colored(" ⚠️ - ESCLUSA-OUTPUT is already OPEN",'yellow'))
+            return '⚠️ La esclusa OUTPUT ya estaba abierta'
+        else:
+            if self.is_input_open is True:
+                print(colored(" ⚠️ - ESCLUSA-INTPUT is OPEN, cannot open OUTPUT",'yellow'))
+                return '🚫 No se ha podido realizar: La esclusa INPUT está abierta'
+            else:
+                self.is_output_open = True
+                print(colored(' 🤖 ESCLUSA: output abierto','green'))
+                return '↪️ ESCLUSA OUTPUT ABIERTA'
+
+    def close_input(self):
+        if self.is_input_open is False:
+            print(colored(" ⚠️ - ESCLUSA-INPUT is already CLOSED",'yellow'))
+            return '⚠️ La esclusa INPUT ya estaba cerrada'
+        else:
+            self.is_input_open = False
+            print(colored(" 🤖 ESCLUSA-INPUT cerrada",'green'))
+            return '↪️ ESCLUSA INPUT CERRADA'
+
+    def close_output(self):
+        if self.is_output_open is False:
+            print(colored(" ⚠️ - ESCLUSA-OUTPUT is already CLOSED",'yellow'))
+            return '⚠️ La esclusa OUTPUT ya estaba cerrada'
+        else:
+            self.is_output_open = False
+            print(colored(" 🤖 ESCLUSA-OUTPUT cerrada",'green'))
+            return '↪️ ESCLUSA OUTPUT CERRADA'
 
 class Arca:
     # Estado general
@@ -57,7 +117,7 @@ class Arca:
     mando: Sala = Sala('Centro de Mando', 2)
     usvital: Sala = Sala('Unidad de soporte vital', 2)
     ops: Sala = Sala('Sala de operaciones', 10)
-    esclusa: Sala = Sala('Esclusa', 2)
+    esclusa: Esclusa = Esclusa('Esclusa', 2)
 
     # Suministros
     stocks: dict[str, Stock]= {
