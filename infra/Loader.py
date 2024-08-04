@@ -106,7 +106,11 @@ default_load = {
         "stocks": {
             "algolosinas": [32,"u"]
         },
-        "fuel": 100
+        "fuel": {
+            "capacidad": 100,
+            "restante": 20.0,
+            "upgraded": False,
+        }
     }
 }
 
@@ -121,28 +125,32 @@ class Loader:
     def load_into(self, bot: Bot):
         game_dict = _get_dict(self.save_method, self.save_endpoint)
 
-        arca_dict = game_dict.get("arca", default_load.get("arca"))
-        bot.arca.fuel = arca_dict.get("fuel", default_load.get("arca").get("fuel"))
+        arca_dict = game_dict.get("arca", default_load["arca"])
 
-        health_dict = arca_dict.get("health", default_load.get("arca").get("health"))
-        bot.arca.health.is_arca_autodestructing = health_dict.get("is_arca_autodestructing", default_load.get("arca").get("health").get("is_arca_autodestructing"))
-        bot.arca.health.temperatura_interior = health_dict.get("temperatura_interior", default_load.get("arca").get("health").get("temperatura_interior"))
-        bot.arca.health.soporte_vital = health_dict.get("soporte_vital", default_load.get("arca").get("health").get("soporte_vital"))
-        bot.arca.health.cellar = health_dict.get("cellar", default_load.get("arca").get("health").get("cellar"))
-        bot.arca.health.reactor = health_dict.get("reactor", default_load.get("arca").get("health").get("reactor"))
-        bot.arca.health.exterior = health_dict.get("exterior", default_load.get("arca").get("health").get("exterior"))
-        bot.arca.health.circuits = health_dict.get("circuits", default_load.get("arca").get("health").get("circuits"))
-        bot.arca.health.boiler = health_dict.get("boiler", default_load.get("arca").get("health").get("boiler"))
-        bot.arca.health.gardens = health_dict.get("gardens", default_load.get("arca").get("health").get("gardens"))
-        bot.arca.health.sleeping_quarters = health_dict.get("sleeping_quarters", default_load.get("arca").get("health").get("sleeping_quarters"))
+        fuel_dict = arca_dict.get("fuel", default_load["arca"]["fuel"])
+        bot.arca.fuel.capacidad = fuel_dict["capacidad"]
+        bot.arca.fuel.restante = fuel_dict["restante"]
+        bot.arca.fuel.upgraded = fuel_dict["upgraded"]
 
-        stocks_dict: dict[str, list[any]] = arca_dict.get("stocks", default_load.get("arca").get("stocks"))
+        health_dict = arca_dict.get("health", default_load["arca"]["health"])
+        bot.arca.health.is_arca_autodestructing = health_dict.get("is_arca_autodestructing", default_load["arca"]["health"]["is_arca_autodestructing"])
+        bot.arca.health.temperatura_interior = health_dict.get("temperatura_interior", default_load["arca"]["health"]["temperatura_interior"])
+        bot.arca.health.soporte_vital = health_dict.get("soporte_vital", default_load["arca"]["health"]["soporte_vital"])
+        bot.arca.health.cellar = health_dict.get("cellar", default_load["arca"]["health"]["cellar"])
+        bot.arca.health.reactor = health_dict.get("reactor", default_load["arca"]["health"]["reactor"])
+        bot.arca.health.exterior = health_dict.get("exterior", default_load["arca"]["health"]["exterior"])
+        bot.arca.health.circuits = health_dict.get("circuits", default_load["arca"]["health"]["circuits"])
+        bot.arca.health.boiler = health_dict.get("boiler", default_load["arca"]["health"]["boiler"])
+        bot.arca.health.gardens = health_dict.get("gardens", default_load["arca"]["health"]["gardens"])
+        bot.arca.health.sleeping_quarters = health_dict.get("sleeping_quarters", default_load["arca"]["health"]["sleeping_quarters"])
+
+        stocks_dict: dict[str, list[any]] = arca_dict.get("stocks", default_load["arca"]["stocks"])
         bot.arca.stocks = {}
         for key, val in stocks_dict.items():
             bot.arca.stocks[key] = Stock(val[0], val[1])
 
 
-        crew_list = game_dict.get("crew", default_load.get("crew"))
+        crew_list = game_dict.get("crew", default_load["crew"])
         for member_dict in crew_list:
             bot.crew.append(Tripulante(member_dict))
 
@@ -159,9 +167,11 @@ class Loader:
                 "name": crewmate.name,
                 "vida": crewmate.vida,
                 "is_sano": crewmate.is_sano,
+                "is_contagiado": crewmate.is_contagiado,
+                "is_criogenizado": crewmate.is_criogenizado,
                 "rango": crewmate.rango,
                 "uuid": crewmate.uuid,
-                "auth": [],
+                "auth": crewmate.permisos,
                 "attrs": {
                     "ciencia": crewmate.atributos.ciencia,
                     "constitucion": crewmate.atributos.constitucion,
@@ -188,9 +198,13 @@ class Loader:
                     "sleeping_quarters": bot.arca.health.sleeping_quarters
                 },
                 "stocks": stocks,
-                "fuel": bot.arca.fuel
+                "fuel": {
+                    "capacidad": bot.arca.fuel.capacidad,
+                    "restante": bot.arca.fuel.restante,
+                    "upgraded": bot.arca.fuel.upgraded,
+                },
             },
-            "crew": [],
+            "crew": crew,
         }
         _set_dict(self.save_method, self.save_endpoint, game_dict)
         pass

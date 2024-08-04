@@ -107,6 +107,10 @@
         "stocks": {
             "algolosinas": [32,"u"]
         },
-        "fuel": 100
+        "fuel": {
+            "capacidad": 100,
+            "restante": 20.0,
+            "upgraded": false
+        }
     }
 }
