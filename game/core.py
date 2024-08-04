@@ -67,7 +67,19 @@ def run(state: Bot_state, user: User_state, command_text: str):
 
         case _:
             print(colored(f" ⚠️ - Invalid command request: {command}",'yellow'))
-            return f"El comando \<{command}\> no está implementado en la interfaz AURA"
+            return f"El comando: '{command}' no está implementado en la interfaz AURA"
+
+def print_estado(sth):
+    return f"""
+        *ESTADO DEL ARCA*\n
+        {sth.cellar}% *Bodega*
+        {sth.reactor}% *Reactor*
+        {sth.exterior}% *Exterior*
+        {sth.circuits}% *Sistema eléctrico*
+        {sth.boiler}% *Caldera*
+        {sth.gardens}% *Huertos*
+        {sth.sleeping_quarters}% *Cabinas tripulantes*
+    """
 
 def say(state: Bot_state, user: User_state, command_text: str):
     re_match = re.search("^[^ ]+", command_text.lower())
@@ -94,16 +106,7 @@ def say(state: Bot_state, user: User_state, command_text: str):
 
         case 'estado':
             print(colored(f" 🤖 {command} - Estado del ARCA",'green'))
-            return f"""
-                ESTADO DEL ARCA\n
-                - Bodega {state.arca.health.cellar}%\n
-                - Reactor {state.arca.health.reactor}%\n
-                - Exterior {state.arca.health.exterior}%\n
-                - Sistema eléctrico {state.arca.health.circuits}%\n
-                - Caldera {state.arca.health.boiler}%\n
-                - Huertos {state.arca.health.gardens}%\n
-                - Cabinas tripulantes {state.arca.health.sleeping_quarters}%
-            """
+            return print_estado(state.arca.health)
 
         case 'inventario':
             inventario = "INVENTARIO DE SUMINISTROS"
@@ -124,4 +127,5 @@ def say(state: Bot_state, user: User_state, command_text: str):
             return f"No existe información registrada para la propiedad: {command}"
 
 def scan(state: Bot_state, user: User_state):
+    print(colored(" ⚠️ WARNING: SCAN feature is not implemented",'orange'))
     return state.txts.txt_scan
