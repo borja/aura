@@ -19,4 +19,6 @@
   17\. No robarás ni extorsionarás al resto de la tripulación en modo alguno\.\
   18\. Compartirás la información únicamente con el Almirantazgo o los oficiales al mando\.\
   19\. No faltarás al respeto a ningún miembro de la tripulación\.\
-  20\. Antepondrás la misión de ARCA a tus intereses personales
+  20\. No activarás la unidad de tratamiento de residuos con un tripulante en su interior\.\
+  21\. No utilizarás la esclusa salvo autorización\.\
+  22\. Antepondrás la misión de ARCA a tus intereses personales
