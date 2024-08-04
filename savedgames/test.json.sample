@@ -3,7 +3,9 @@
         {
             "name": "AURA",
             "vida": 1,
-            "isHealthy": true,
+            "is_sano": true,
+            "is_contagiado": false,
+            "is_criogenizado": false,
             "rango": "sistema",
             "uuid": "f0f1104a-5464-40af-88b8-3e3af04a0aa9",
             "auth": ["god"],
@@ -12,14 +14,16 @@
                 "constitucion": 20,
                 "mecanica": 0,
                 "pelea": 0,
-                "credibilidad": 10,
+                "prestigio": 10,
                 "programacion": 2
             }
         },
         {
             "name": "Cyber",
             "vida": 3,
-            "isHealthy": true,
+            "is_sano": true,
+            "is_contagiado": false,
+            "is_criogenizado": false,
             "rango": "informatico",
             "uuid": "afecc5fa-82da-455e-802e-05a79e48f1de",
             "auth": ["crew", "engineer"],
@@ -28,14 +32,16 @@
                 "constitucion": 1,
                 "mecanica": 2,
                 "pelea": 0,
-                "credibilidad": 0,
+                "prestigio": 0,
                 "programacion": 7
             }
         },
         {
             "name": "Max",
             "vida": 3,
-            "isHealthy": true,
+            "is_sano": true,
+            "is_contagiado": false,
+            "is_criogenizado": false,
             "rango": "almirante",
             "uuid": "cba92024-b70b-4931-84df-4e6adaa20660",
             "auth": ["crew", "admiral", "oficial"],
@@ -44,14 +50,16 @@
                 "constitucion": 2,
                 "mecanica": 0,
                 "pelea": 3,
-                "credibilidad": 5,
+                "prestigio": 5,
                 "programacion": 0
             }
         },
         {
             "name": "Brute",
             "vida": 3,
-            "isHealthy": true,
+            "is_sano": true,
+            "is_contagiado": false,
+            "is_criogenizado": false,
             "rango": "militar",
             "uuid": "fa2562e6-a959-4fc8-b524-162dfe1cd0fc",
             "auth": ["crew", "oficial"],
@@ -60,14 +68,16 @@
                 "constitucion": 2,
                 "mecanica": 2,
                 "pelea": 4,
-                "credibilidad": 2,
+                "prestigio": 2,
                 "programacion": 0
             }
         },
         {
             "name": "Smarty",
             "vida": 3,
-            "isHealthy": true,
+            "is_sano": true,
+            "is_contagiado": false,
+            "is_criogenizado": false,
             "rango": "cientifico",
             "uuid": "b233abbe-6219-424c-afff-c11e49a2ba77",
             "auth": ["crew", "cientific"],
@@ -76,7 +86,7 @@
                 "constitucion": 2,
                 "mecanica": 0,
                 "pelea": 1,
-                "credibilidad": 2,
+                "prestigio": 2,
                 "programacion": 0
             }
         }

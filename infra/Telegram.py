@@ -6,6 +6,7 @@ from telegram import Update
 from telegram.constants import ParseMode
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
+from infra.Loader import Loader
 from infra.Settings import Settings
 from game.core import Bot, say, run, help, start, scan
 from infra.Texts import Texts
@@ -18,6 +19,9 @@ class Telegram:
         self.token = token
         arca = Arca()
         state = Bot(config.bot_id, arca, texts)
+        loader = Loader(config.save_endpoint, config.save_method)
+
+        loader.load_into(state)
 
         app = Application.builder().token(token).build()
 

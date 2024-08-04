@@ -12,7 +12,7 @@ default_load = {
         {
             "name": "AURA",
             "vida": 1,
-            "isHealthy": True,
+            "is_sano": True,
             "rango": "sistema",
             "uuid": "f0f1104a-5464-40af-88b8-3e3af04a0aa9",
             "auth": ["god"],
@@ -21,14 +21,14 @@ default_load = {
                 "constitucion": 20,
                 "mecanica": 0,
                 "pelea": 0,
-                "credibilidad": 10,
+                "prestigio": 10,
                 "programacion": 2
             }
         },
         {
             "name": "Cyber",
             "vida": 3,
-            "isHealthy": True,
+            "is_sano": True,
             "rango": "informatico",
             "uuid": "afecc5fa-82da-455e-802e-05a79e48f1de",
             "auth": ["crew", "engineer"],
@@ -37,14 +37,14 @@ default_load = {
                 "constitucion": 1,
                 "mecanica": 2,
                 "pelea": 0,
-                "credibilidad": 0,
+                "prestigio": 0,
                 "programacion": 7
             }
         },
         {
             "name": "Max",
             "vida": 3,
-            "isHealthy": True,
+            "is_sano": True,
             "rango": "almirante",
             "uuid": "cba92024-b70b-4931-84df-4e6adaa20660",
             "auth": ["crew", "admiral", "oficial"],
@@ -53,14 +53,14 @@ default_load = {
                 "constitucion": 2,
                 "mecanica": 0,
                 "pelea": 3,
-                "credibilidad": 5,
+                "prestigio": 5,
                 "programacion": 0
             }
         },
         {
             "name": "Brute",
             "vida": 3,
-            "isHealthy": True,
+            "is_sano": True,
             "rango": "militar",
             "uuid": "fa2562e6-a959-4fc8-b524-162dfe1cd0fc",
             "auth": ["crew", "oficial"],
@@ -69,14 +69,14 @@ default_load = {
                 "constitucion": 2,
                 "mecanica": 2,
                 "pelea": 4,
-                "credibilidad": 2,
+                "prestigio": 2,
                 "programacion": 0
             }
         },
         {
             "name": "Smarty",
             "vida": 3,
-            "isHealthy": True,
+            "is_sano": True,
             "rango": "cientifico",
             "uuid": "b233abbe-6219-424c-afff-c11e49a2ba77",
             "auth": ["crew", "cientific"],
@@ -85,7 +85,7 @@ default_load = {
                 "constitucion": 2,
                 "mecanica": 0,
                 "pelea": 1,
-                "credibilidad": 2,
+                "prestigio": 2,
                 "programacion": 0
             }
         }
@@ -139,27 +139,26 @@ class Loader:
         stocks_dict: dict[str, list[any]] = arca_dict.get("stocks", default_load.get("arca").get("stocks"))
         bot.arca.stocks = {}
         for key, val in stocks_dict.items():
-            bot.arca.stocks.update((key,Stock(val[0], val[1])))
+            bot.arca.stocks[key] = Stock(val[0], val[1])
 
 
         crew_list = game_dict.get("crew", default_load.get("crew"))
         for member_dict in crew_list:
-            attr_dict = member_dict.get("attrs")
-            bot.crew.append(Tripulante(member_dict.get("uuid"), member_dict.get("name"), member_dict.get("rango"), Atributos(attr_dict)))
+            bot.crew.append(Tripulante(member_dict))
 
     def save_from(self, bot: Bot):
         if( self.save_method != "file"):
             return
         stocks = {}
         for stockName, stockVal in bot.arca.stocks.items:
-            stocks.update((stockName, [stockVal.amount, stockVal.unit]))
+            stocks[stockName] = [stockVal.amount, stockVal.unit]
         
         crew = []
         for crewmate in bot.crew:
             crew.append({
                 "name": crewmate.name,
                 "vida": crewmate.vida,
-                "isHealthy": crewmate.is_enfermo,
+                "is_sano": crewmate.is_sano,
                 "rango": crewmate.rango,
                 "uuid": crewmate.uuid,
                 "auth": [],
@@ -168,7 +167,7 @@ class Loader:
                     "constitucion": crewmate.atributos.constitucion,
                     "mecanica": crewmate.atributos.mecanica,
                     "pelea": crewmate.atributos.pelea,
-                    "credibilidad": crewmate.atributos.credibilidad,
+                    "prestigio": crewmate.atributos.prestigio,
                     "programacion": crewmate.atributos.programacion,
                 }
             })
