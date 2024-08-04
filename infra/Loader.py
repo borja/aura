@@ -104,7 +104,7 @@ default_load = {
             "sleeping_quarters": 100
         },
         "stocks": {
-            "algasugos": [32,"u"]
+            "algolosinas": [32,"u"]
         },
         "fuel": 100
     }
