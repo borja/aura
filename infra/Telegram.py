@@ -8,7 +8,7 @@ import re
 
 from game.Arca import Arca
 from infra.Settings import Settings
-from game.core import Bot_state, say, run, help
+from game.core import Bot, say, run, help, start
 from infra.Texts import Texts
 
 class Telegram:
@@ -17,7 +17,7 @@ class Telegram:
         print(" 🤖 AURA assistant is initializing")
         self.token = token
         arca = Arca()
-        state = Bot_state(config.bot_id, arca, texts)
+        state = Bot(config.bot_id, arca, texts)
 
         app = Application.builder().token(token).build()
 
@@ -29,14 +29,15 @@ class Telegram:
         print(" 🤖 AURA assistant is ready for duty")
         app.run_polling(poll_interval=1)
 
-async def start_command(state: Bot_state, update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(state.txts.txt_welcome, parse_mode=ParseMode.MARKDOWN_V2)
+async def start_command(state: Bot, update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = state.user(context._chat_id)
+    await update.message.reply_text(start(state, user), parse_mode=ParseMode.MARKDOWN_V2)
 
-async def help_command(state: Bot_state, update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def help_command(state: Bot, update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = state.user(context._chat_id)
     await update.message.reply_text(help(state, user), parse_mode=ParseMode.MARKDOWN_V2)
 
-async def handle_message(state: Bot_state, update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def handle_message(state: Bot, update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_type: str = update.message.chat.type
     text: str = update.message.text
     user = state.user(context._chat_id)
@@ -70,5 +71,5 @@ async def handle_message(state: Bot_state, update: Update, context: ContextTypes
             print(f"Invalid command request: {command}")
             await update.message.reply_text(f"No existe el comando \"{command}\"")
 
-async def handle_error(state: Bot_state, update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def handle_error(state: Bot, update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(f"Update {update} caused and error: {context.error}")

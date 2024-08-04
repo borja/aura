@@ -1,3 +1,5 @@
 {
-    "bot_id": "@aurainterface_bot"
+    "bot_id": "@aurainterface_bot",
+    "save_method": "file",
+    "save_endpoint": "test.json"
 }
