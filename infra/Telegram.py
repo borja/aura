@@ -30,11 +30,11 @@ class Telegram:
         app.run_polling(poll_interval=1)
 
 async def start_command(state: Bot_state, update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(state.txts.txt_welcome)
+    await update.message.reply_text(state.txts.txt_welcome, parse_mode=ParseMode.MARKDOWN_V2)
 
 async def help_command(state: Bot_state, update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = state.user(context._chat_id)
-    await update.message.reply_text(help(state, user))
+    await update.message.reply_text(help(state, user), parse_mode=ParseMode.MARKDOWN_V2)
 
 async def handle_message(state: Bot_state, update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_type: str = update.message.chat.type
@@ -59,13 +59,13 @@ async def handle_message(state: Bot_state, update: Update, context: ContextTypes
 
     match command:
         case "ayuda" | "help":
-            await update.message.reply_markdown(help(state, user))
+            await update.message.reply_text(help(state, user), parse_mode=ParseMode.MARKDOWN_V2)
         case "haz" | "ejecuta" | "orden":
-            await update.message.reply_markdown(run(state,user,rest))
+            await update.message.reply_text(run(state,user,rest), parse_mode=ParseMode.MARKDOWN_V2)
         case "dime" | "imprime" | "informa" | "muestra":
-            await update.message.reply_markdown(say(state,user,rest))
+            await update.message.reply_text(say(state,user,rest), parse_mode=ParseMode.MARKDOWN_V2)
         case "hola" | "saludos" | "saludo":
-            await update.message.reply_markdown(state.txts.txt_saludo)
+            await update.message.reply_text(state.txts.txt_saludo, parse_mode=ParseMode.MARKDOWN_V2)
         case _:
             print(f"Invalid command request: {command}")
             await update.message.reply_text(f"No existe el comando \"{command}\"")
