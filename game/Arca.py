@@ -15,9 +15,10 @@ class Combustible:
     restante: float
     upgraded: bool
 
-    def __init__(self, restante: float):
+    def __init__(self, capacidad: int, restante: float, upgraded: bool):
+        self.capacidad = capacidad
         self.restante = restante
-        self.upgraded = False
+        self.upgraded = upgraded
 
 class Stock:
     amount: float = 0
@@ -29,7 +30,7 @@ class Stock:
 
 class Arca:
     health: Health = Health()
-    fuel: Combustible = Combustible(100)
+    fuel: Combustible = Combustible(100, 100, False)
     stocks: dict[str, Stock]= {
         'algolosina': Stock(32, "u"),
     }
