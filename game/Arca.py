@@ -28,6 +28,10 @@ class Stock:
         self.amount = amount
         self.unit = unit
 
+class Sala:
+    nombre: str
+    aforo: int
+
 class Arca:
     health: Health = Health()
     fuel: Combustible = Combustible(100, 100, False)
