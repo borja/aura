@@ -3,40 +3,18 @@ import re
 from typing import Optional
 from termcolor import colored
 from game.Arca import Arca
+from game.Bot import Bot
 from game.Tripulante import Tripulante
+from game.User import User
 from infra.Texts import Texts
 
-class User_state:
-    id: int
-    avatar: Optional[Tripulante]
+def start(state: Bot, user: User):
+    return state.txts.txt_welcome
 
-    def __init__(self, id: int):
-        self.id = id
-
-class Bot_state:
-    id: str
-    txts: Texts
-    arca: Arca
-    users: list[User_state] = []
-
-    def __init__(self, bot_id: str, arca: Arca, txts: Texts):
-        self.id = bot_id
-        self.arca = arca
-        self.txts = txts
-
-    def user(self, id: int):
-        for user in self.users:
-            if user.id == id:
-                return user
-
-        new_user = User_state(id)
-        self.users.append(new_user)
-        return new_user
-
-def help(state: Bot_state, user: User_state):
+def help(state: Bot, user: User):
     return state.txts.txt_ayuda
 
-def run(state: Bot_state, user: User_state, command_text: str):
+def run(state: Bot, user: User, command_text: str):
     re_match = re.search("^[^ ]+", command_text.lower())
     command = re_match[0]
     args = command_text[re_match.end(0)+1:].split(' ')
@@ -81,7 +59,7 @@ def print_estado(sth):
         {sth.sleeping_quarters}% *Cabinas tripulantes*
     """
 
-def say(state: Bot_state, user: User_state, command_text: str):
+def say(state: Bot, user: User, command_text: str):
     re_match = re.search("^[^ ]+", command_text.lower())
     command = re_match[0]
     args = command_text[re_match.end(0)+1:].split(' ')
@@ -126,6 +104,6 @@ def say(state: Bot_state, user: User_state, command_text: str):
             print(colored(f" ⚠️ - Invalid information request: {command}",'yellow'))
             return f"No existe información registrada para la propiedad: {command}"
 
-def scan(state: Bot_state, user: User_state):
+def scan(state: Bot, user: Bot):
     print(colored(" ⚠️ WARNING: SCAN feature is not implemented",'orange'))
     return state.txts.txt_scan

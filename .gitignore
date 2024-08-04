@@ -5,3 +5,5 @@
 !.vscode/launch.json
 !.vscode/tasks.json
 settings.json
+savedgames/**
+!savedgames/**.sample
