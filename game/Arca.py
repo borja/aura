@@ -12,6 +12,12 @@ class Health:
 
 class Combustible:
     capacidad: int = 100
+    restante: float
+    upgraded: bool
+
+    def __init__(self, restante: float):
+        self.restante = restante
+        self.upgraded = False
 
 class Stock:
     amount: float = 0
