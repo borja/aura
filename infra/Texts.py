@@ -1,4 +1,3 @@
-from os import read
 from os.path import isfile, basename
 import glob
 
@@ -12,6 +11,7 @@ class Texts:
     txt_saludo: str = ""
     txt_tripulantes: str = ""
     txt_welcome: str = ""
+    txt_scan: str = ""
 
     def __init__(self, path: str):
         self.path = path
@@ -23,20 +23,25 @@ class Texts:
             if isfile(file) is False:
                 continue
             name = basename(file).replace(".md","")
-            match name:
-                case "ayuda":
-                    self.txt_ayuda = open(file, mode="r", encoding="utf-8").read()
-                case "leyes":
-                    self.txt_leyes = open(file, mode="r", encoding="utf-8").read()
-                case "normas":
-                    self.txt_normas = open(file, mode="r", encoding="utf-8").read()
-                case "salas":
-                    self.txt_salas = open(file, mode="r", encoding="utf-8").read()
-                case "saludo":
-                    self.txt_saludo = open(file, mode="r", encoding="utf-8").read()
-                case "tripulantes":
-                    self.txt_tripulantes = open(file, mode="r", encoding="utf-8").read()
-                case "welcome":
-                    self.txt_welcome = open(file, mode="r", encoding="utf-8").read()
-                case _:
-                    pass
+
+            with open(file, mode="r", encoding="utf-8") as texto_interno:
+                # Command selector:
+                match name:
+                    case "ayuda":
+                        self.txt_ayuda = texto_interno.read()
+                    case "leyes":
+                        self.txt_leyes = texto_interno.read()
+                    case "normas":
+                        self.txt_normas = texto_interno.read()
+                    case "salas":
+                        self.txt_salas = texto_interno.read()
+                    case "saludo":
+                        self.txt_saludo = texto_interno.read()
+                    case "tripulantes":
+                        self.txt_tripulantes = texto_interno.read()
+                    case "welcome":
+                        self.txt_welcome = texto_interno.read()
+                    case "scan":
+                        self.txt_scan = texto_interno.read()
+                    case _:
+                        pass

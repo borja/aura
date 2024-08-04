@@ -1,8 +1,8 @@
 import re
 
+from typing import Optional
 from game.Arca import Arca
 from game.Tripulante import Tripulante
-from typing import Optional
 from infra.Texts import Texts
 
 class User_state:
@@ -106,3 +106,7 @@ def say(state: Bot_state, user: User_state, command_text: str):
 
         case _:
             return f"No existe información registrada para la propiedad: {command}."
+
+def scan(state: Bot_state, user: User_state):
+    return state.txts.txt_ayuda
+
