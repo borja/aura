@@ -48,12 +48,13 @@ def run(state: Bot, user: User, command_text: str):
             return f"El comando: '{command}' no está implementado en la interfaz AURA"
 
 def print_estado(sth):
+    auto_destr_msg = '⏲️ Programada' if sth.is_arca_autodestructing else '✅ Inactiva'
     return f"""
 *ESTADO DEL ARCA*
 
-    \- Temperatura interior: 🌡️{sth.temperatura_interior}ºC
-    \- Autodestrucción: {'⏲️ Programada' if sth.is_arca_autodestructing else '✅ Inactiva'}
-    \- 🛡️{sth.estado_casco}% Estado estructural del blindaje
+    🌡️ Temperatura interior: {sth.temperatura_interior}ºC
+    💥 Autodestrucción: {auto_destr_msg}
+    🛡️ {sth.estado_casco}% Estado estructural del blindaje
 """
 
 def say(state: Bot, user: User, command_text: str):
@@ -101,10 +102,25 @@ def say(state: Bot, user: User, command_text: str):
             print(colored(f" ⚠️ - Invalid information request: {command}",'yellow'))
             return f"No existe información registrada para la propiedad: {command}"
 
+def describe_crew(tripulante):
+    #TODO: This will provide info about crew members
+    return f"CREW: {tripulante}"
+
 def scan(state: Bot, user: Bot,  command_text: str):
     re_match = re.search("^[^ ]+", command_text.lower())
     command = re_match[0]
     args = command_text[re_match.end(0)+1:].split(' ')
 
-    print(colored(f" ⚠️ WARNING: SCAN feature for command: {command}, {args} is not implemented",'yellow'))
-    return " ⚠️ WARNING: Esta feature no ha sido implementada"
+    match command:
+        case 'crew':
+            print(colored(f"🔎 SCAN CODE command: {command} received, with args: ",'blue'))
+            return describe_crew(args)
+        case 'room':
+            print(colored(f" ⚠️ WARNING: SCAN feature for command: {command}, {args} is not implemented",'yellow'))
+            return " ⚠️ WARNING: Esta feature no ha sido implementada"
+        case 'test':
+            print(colored(f" ⚠️ WARNING: SCAN feature for command: {command}, {args} is not implemented",'yellow'))
+            return " ⚠️ WARNING: Esta feature no ha sido implementada"
+        case _:
+            print(colored(f" ⚠️ - Invalid scan request: {command}",'yellow'))
+            return f"🚫 No es viable realizar un análisis de tipo: {command}"            
