@@ -117,5 +117,6 @@
             "restante": 20.0,
             "upgraded": false
         }
-    }
+    },
+    "users": []
 }

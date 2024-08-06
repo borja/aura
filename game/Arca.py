@@ -1,7 +1,25 @@
 class Health:
+    is_fin_del_juego: bool = False
     is_arca_autodestructing: bool = False
     temperatura_interior: int = 23
     estado_casco: float = 100
+
+    @staticmethod
+    def from_dict(fuente: dict[str, any]):
+        health = Health()
+        health.is_fin_del_juego = fuente.get('is_fin_del_juego', False)
+        health.is_arca_autodestructing = fuente.get('is_arca_autodestructing', False)
+        health.temperatura_interior = fuente.get('temperatura_interior', 23)
+        health.estado_casco = fuente.get('estado_casco', 100)
+        return health
+    
+    def to_dict(self):
+        return {
+            'is_fin_del_juego': self.is_fin_del_juego,
+            'is_arca_autodestructing': self.is_arca_autodestructing,
+            'temperatura_interior': self.temperatura_interior,
+            'estado_casco': self.temperatura_interior,
+        }
 
 class Combustible:
     capacidad: int = 100
@@ -13,28 +31,63 @@ class Combustible:
         self.restante = restante
         self.upgraded = upgraded
 
+    @staticmethod
+    def from_dict(fuente: dict[str, any]):
+        out_combustible = Combustible(fuente.get('capacidad', 100), fuente.get('restante', 100.0), fuente.get('upgraded', False))
+        return out_combustible
+    
+    def to_dict(self):
+        return {
+            'capacidad': self.capacidad,
+            'restante': self.restante,
+            'upgraded': self.upgraded,
+        }
+
 class Stock:
     amount: float = 0
-    unit: str = "kg"
+    unit: str = 'kg'
 
     def __init__(self, amount: float, unit: str):
         self.amount = amount
         self.unit = unit
+    
+    @staticmethod
+    def from_tuple(tuple: tuple[int, str]):
+        return Stock(tuple[0], tuple[1])
+    
+    def to_tuple(self):
+        return (self.amount, self.unit)
 
 class Sala:
+    id: str
     nombre: str
     aforo: int
     estado: int
-    permisos: dict
+    permisos: list[str]
 
     def __init__(self, nombre: str, aforo: int):
         self.nombre = nombre
         self.aforo = aforo
         self.estado = 100
-        self.permisos = {
-            'ciencia': True,
-            'ingeniería': True,
-            'militares': True
+        self.permisos = []
+
+    @staticmethod
+    def from_dict(fuente: dict[str, any]):
+        out_sala = Sala('', 1)
+        out_sala.id = fuente.get('id', 'ERR500__invalid_id')
+        out_sala.nombre = fuente.get('nombre', 'ERR500__invalid_name')
+        out_sala.aforo = fuente.get('aforo', 1)
+        out_sala.estado = fuente.get('estado', 100)
+        out_sala.permisos = fuente.get('permisos', [])
+        return out_sala
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'nombre': self.nombre,
+            'aforo': self.aforo,
+            'estado': self.estado,
+            'permisos': self.permisos,
         }
 
 class Esclusa(Sala):
@@ -92,6 +145,19 @@ class Esclusa(Sala):
             self.is_output_open = False
             print(colored(" 🤖 ESCLUSA-OUTPUT cerrada",'green'))
             return '↪️ ESCLUSA OUTPUT CERRADA'
+    
+    @staticmethod
+    def from_dict(fuente: dict[str, any]):
+        esclusa = Esclusa()
+        esclusa.is_output_open = fuente.get('is_output_open', False)
+        esclusa.is_input_open = fuente.get('is_input_open', False)
+        return esclusa
+    
+    def to_dict(self):
+        dict_esclusa = super().to_dict()
+        dict_esclusa["is_output_open"] = False
+        dict_esclusa["is_input_open"] = False
+        return dict_esclusa
 
 class Arca:
     # Estado general
@@ -123,3 +189,18 @@ class Arca:
     stocks: dict[str, Stock]= {
         'algolosina': Stock(32, "u"),
     }
+
+    @staticmethod
+    def from_dict(fuente: dict[str, any]):
+        arca = Arca()
+        return arca
+
+    def to_dict(self):
+        stocks = dict[str, dict[str, tuple[int, str]]]
+        for stock, value in self.stocks.items():
+            stocks[stock] = value.to_tuple()
+        return {
+            'health': self.health.to_dict(),
+            'fuel': self.fuel.to_dict(),
+            'stocks': stocks,
+        }
