@@ -4,14 +4,14 @@ import glob
 class Texts:
     path: str
 
-    txt_ayuda: str = ""
-    txt_leyes: str = ""
-    txt_normas: str = ""
-    txt_salas: str = ""
-    txt_saludo: str = ""
-    txt_tripulantes: str = ""
-    txt_welcome: str = ""
-    txt_scan: str = ""
+    txt_ayuda: str = ''
+    txt_leyes: str = ''
+    txt_normas: str = ''
+    txt_salas: str = ''
+    txt_saludo: str = ''
+    txt_tripulantes: str = ''
+    txt_welcome: str = ''
+    txt_scan: str = ''
 
     def __init__(self, path: str):
         self.path = path
@@ -22,26 +22,26 @@ class Texts:
         for file in files:
             if isfile(file) is False:
                 continue
-            name = basename(file).replace(".md","")
+            name = basename(file).replace('.md','')
 
-            with open(file, mode="r", encoding="utf-8") as texto_interno:
+            with open(file, mode='r', encoding='utf-8') as texto_interno:
                 # Command selector:
                 match name:
-                    case "ayuda":
+                    case 'ayuda':
                         self.txt_ayuda = texto_interno.read()
-                    case "leyes":
+                    case 'leyes':
                         self.txt_leyes = texto_interno.read()
-                    case "normas":
+                    case 'normas':
                         self.txt_normas = texto_interno.read()
-                    case "salas":
+                    case 'salas':
                         self.txt_salas = texto_interno.read()
-                    case "saludo":
+                    case 'saludo':
                         self.txt_saludo = texto_interno.read()
-                    case "tripulantes":
+                    case 'tripulantes':
                         self.txt_tripulantes = texto_interno.read()
-                    case "welcome":
+                    case 'welcome':
                         self.txt_welcome = texto_interno.read()
-                    case "scan":
+                    case 'scan':
                         self.txt_scan = texto_interno.read()
                     case _:
                         pass

@@ -28,14 +28,14 @@ class Atributos:
         }
 
 class Tripulante:
-    uuid: str = ""
-    id: str = ""
-    name: str = ""
-    cuerpo: str = ""
-    rango: str = ""
+    uuid: str = ''
+    id: str = ''
+    name: str = ''
+    cuerpo: str = ''
+    rango: str = ''
     permisos: list[str] = []
     vida: int = 3
-    estado: str = ""
+    estado: str = ''
     is_sano: bool = True
     is_contagiado: bool = False
     is_criogenizado: bool = False
@@ -49,7 +49,7 @@ class Tripulante:
         tripulante.name = fuente.get('name', 'ERR500')
         tripulante.cuerpo = fuente.get('cuerpo', 'ERR500')
         tripulante.rango = fuente.get('rango', 'ERR500')
-        tripulante.permisos = fuente.get('auth', ['miembro'])
+        tripulante.permisos = fuente.get('permisos', ['miembro'])
         tripulante.vida = fuente.get('vida', 3)
         tripulante.is_sano = fuente.get('is_sano', True)
         tripulante.is_contagiado = fuente.get('is_contagiado', False)

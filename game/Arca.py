@@ -58,37 +58,69 @@ class Stock:
     def to_tuple(self):
         return (self.amount, self.unit)
 
+ATR_ESCLUSA = 'esclusa'
+ATR_SELLABLE = 'sellable'
+ATR_AUTOCERRADO = 'autocerrado'
+
 class Sala:
-    id: str
-    nombre: str
-    aforo: int
-    estado: int
-    permisos: list[str]
+    id: str = ''
+    nombre: str = ''
+    descripcion: str = ''
+    aforo: int = 1
+    is_puerta_abierta: bool = False
+    estado: int = 100
+    permisos: list[str] = []
+    atributos: list[str] = []
+    datos: dict[str, any] = dict()
 
     def __init__(self, nombre: str, aforo: int):
         self.nombre = nombre
         self.aforo = aforo
-        self.estado = 100
-        self.permisos = []
+
+    def tiene_permiso(self, permisos: list[str]):
+        if permisos[0] == 'admin':
+            return True
+        for requisito in self.permisos:
+            if requisito not in permisos:
+                return False
+        return True
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'nombre': self.nombre,
+            'descripcion': self.descripcion,
+            'aforo': self.aforo,
+            'is_puerta_abierta': self.is_puerta_abierta,
+            'estado': self.estado,
+            'permisos': self.permisos,
+            'atributos': self.atributos,
+            'datos': self.datos,
+        }
+    
+    def _asegurar_datos_atributos(self):
+        if ATR_SELLABLE in self.atributos:
+            self.datos['sellado'] = self.datos.get('sellado', False)
+            self.datos['permisos_sellado'] = self.datos.get('permisos_sellado', [])
+        if ATR_ESCLUSA in self.atributos:
+            self.datos['modo_esclusa'] = self.datos.get('modo_esclusa', 'NULL')
+            self.datos['permisos_esclusa'] = self.datos.get('permisos_esclusa', [])
 
     @staticmethod
     def from_dict(fuente: dict[str, any]):
         out_sala = Sala('', 1)
         out_sala.id = fuente.get('id', 'ERR500__invalid_id')
         out_sala.nombre = fuente.get('nombre', 'ERR500__invalid_name')
+        out_sala.descripcion = fuente.get('descripcion', 'ERR500__invalid_desc')
         out_sala.aforo = fuente.get('aforo', 1)
+        out_sala.is_puerta_abierta = fuente.get('is_puerta_abierta', False)
         out_sala.estado = fuente.get('estado', 100)
         out_sala.permisos = fuente.get('permisos', [])
+        out_sala.atributos = fuente.get('atributos', [])
+        out_sala.datos = fuente.get('datos', out_sala.datos)
+        out_sala._asegurar_datos_atributos()
         return out_sala
-    
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'nombre': self.nombre,
-            'aforo': self.aforo,
-            'estado': self.estado,
-            'permisos': self.permisos,
-        }
+
 
 class Esclusa(Sala):
     is_output_open: bool = False
@@ -164,35 +196,26 @@ class Arca:
     health: Health = Health()
 
     # Combustible
-    fuel: Combustible = Combustible(100, 100, False)
+    combustible: Combustible = Combustible(100, 100, False)
 
     # Salas
-    sleeping_quarters: Sala = Sala('Camarotes', 6)
-    almirante: Sala = Sala('Camarote del Almirantazgo', 2)
-    hospital: Sala = Sala('Hospital ', 3)
-    soporte_vital: Sala = Sala('Sala de criogenización', 2)
-    cultivo1: Sala = Sala('Cultivo de Algolosinas I', 3)
-    cultivo2: Sala = Sala('Cultivo de Algolosinas II', 3)
-    residuos: Sala = Sala('Unidad de tratamiento de residuos', 1)
-    celda1: Sala = Sala('Celda de aislamiento I', 1)
-    celda2: Sala = Sala('Celda de aislamiento II', 1)
-    comms: Sala = Sala('Sala de comunicaciones', 2)
-    reactor: Sala = Sala('Cámara del reactor', 2)
-    lab: Sala = Sala('Laboratorio de ciencia', 3)
-    almacen: Sala = Sala('Almacén', 1)
-    mando: Sala = Sala('Centro de Mando', 2)
-    usvital: Sala = Sala('Unidad de soporte vital', 2)
-    ops: Sala = Sala('Sala de operaciones', 10)
-    esclusa: Esclusa = Esclusa('Esclusa', 2)
+    salas: list[Sala] = []
 
     # Suministros
-    stocks: dict[str, Stock]= {
-        'algolosina': Stock(32, "u"),
-    }
+    stocks: dict[str, Stock]= {}
 
     @staticmethod
     def from_dict(fuente: dict[str, any]):
         arca = Arca()
+        arca.health = Health.from_dict(fuente.get('health', {}))
+        stocks: dict[str, tuple[int, str]] = fuente.get('stocks', {})
+        for stock, val in stocks.items():
+            arca.stocks[stock] = Stock.from_tuple(val)
+        arca.combustible = Combustible.from_dict(fuente.get('combustible', {}))
+        salas: list[dict[str, any]] = fuente.get('salas', [])
+        for sala in salas:
+            arca.salas.append( Sala.from_dict(sala))
+        
         return arca
 
     def to_dict(self):
@@ -201,6 +224,7 @@ class Arca:
             stocks[stock] = value.to_tuple()
         return {
             'health': self.health.to_dict(),
-            'fuel': self.fuel.to_dict(),
+            'combustible': self.combustible.to_dict(),
             'stocks': stocks,
+            'salas': list(map((lambda sala: sala.to_dict()), self.salas))
         }
