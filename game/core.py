@@ -49,15 +49,12 @@ def run(state: Bot, user: User, command_text: str):
 
 def print_estado(sth):
     return f"""
-        *ESTADO DEL ARCA*\n
-        {sth.cellar}% *Bodega*
-        {sth.reactor}% *Reactor*
-        {sth.exterior}% *Exterior*
-        {sth.circuits}% *Sistema eléctrico*
-        {sth.boiler}% *Caldera*
-        {sth.gardens}% *Huertos*
-        {sth.sleeping_quarters}% *Cabinas tripulantes*
-    """
+*ESTADO DEL ARCA*
+
+    \- Temperatura interior: 🌡️{sth.temperatura_interior}ºC
+    \- Autodestrucción: {'⏲️ Programada' if sth.is_arca_autodestructing else '✅ Inactiva'}
+    \- 🛡️{sth.estado_casco}% Estado estructural del blindaje
+"""
 
 def say(state: Bot, user: User, command_text: str):
     re_match = re.search("^[^ ]+", command_text.lower())
@@ -109,5 +106,5 @@ def scan(state: Bot, user: Bot,  command_text: str):
     command = re_match[0]
     args = command_text[re_match.end(0)+1:].split(' ')
 
-    print(colored(f" ⚠️ WARNING: SCAN feature for command {command} is not implemented",'yellow'))
+    print(colored(f" ⚠️ WARNING: SCAN feature for command: {command}, {args} is not implemented",'yellow'))
     return " ⚠️ WARNING: Esta feature no ha sido implementada"

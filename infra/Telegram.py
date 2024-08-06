@@ -92,8 +92,7 @@ async def handle_text_command(state: Bot, user: User, update: Update, context: C
 
 async def handle_error(state: Bot, update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(
-        colored(' ❌ ERROR caused by context: ','red'),
-        colored(context.error, 'grey'),
+        colored(' ❌ ERROR caused by context: ','red'), context.error,
         colored(update,'grey')
     )
 
