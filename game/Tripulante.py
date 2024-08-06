@@ -16,6 +16,7 @@ class Atributos:
 
 class Tripulante:
     uuid: str
+    id: str
     name: str
     rango: str
     permisos: list[str]
@@ -27,6 +28,7 @@ class Tripulante:
     atributos: Atributos
 
     def __init__(self, crewmate: dict):
+        self.id = crewmate["id"]
         self.uuid = crewmate["uuid"]
         self.name = crewmate["name"]
         self.rango = crewmate["rango"]

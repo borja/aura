@@ -102,18 +102,22 @@ def say(state: Bot, user: User, command_text: str):
             print(colored(f" ⚠️ - Invalid information request: {command}",'yellow'))
             return f"No existe información registrada para la propiedad: {command}"
 
-def describe_crew(tripulante):
-    #TODO: This will provide info about crew members
+def describe_crew(state: Bot, user: Bot, tripulante):
+    member = next((mem for mem in state.crew if mem.id == tripulante), None)
+
+    if member == None:
+        return "Este tripulante no existe"
+
     return f"""
 *INFORME DE TRIPULANTE*
 
-    *Nombre*: {tripulante}
-    *Asignación*: {'ciencia'}
-    *Prestigio* {0}
-    *Salud*: {'sano'}
+    *Nombre*: {member.name}
+    *Asignación*: {member.rango}
+    *Prestigio* {member.atributos.prestigio}
+    *Salud*: {member.estado}
     """
 
-def scan(state: Bot, user: Bot,  command_text: str):
+def scan(state: Bot, user: Bot, command_text: str):
     re_match = re.search("^[^ ]+", command_text.lower())
     command = re_match[0]
     args = command_text[re_match.end(0)+1:].split(' ')
@@ -121,7 +125,7 @@ def scan(state: Bot, user: Bot,  command_text: str):
     match command:
         case 'crew' | 'tripulante':
             print(colored(f" 🔎 SCAN CODE command: {command} received, with args: ",'blue'))
-            return describe_crew(args)
+            return describe_crew(state, user, args[0])
         case 'room' | 'sala':
             print(colored(f" ⚠️ WARNING: SCAN feature for command: {command}, {args} is not implemented",'yellow'))
             return " ⚠️ WARNING: Esta feature no ha sido implementada"
