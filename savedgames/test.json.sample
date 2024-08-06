@@ -2,7 +2,7 @@
     "crew": [
         {
             "name": "AURA",
-            "vida": 1,
+            "cuerpo": "IA",
             "is_sano": true,
             "is_contagiado": false,
             "is_criogenizado": false,
@@ -14,14 +14,33 @@
                 "ciencia": 0,
                 "constitucion": 20,
                 "mecanica": 0,
-                "pelea": 0,
-                "prestigio": 10,
+                "combate": 0,
+                "credibilidad": 10,
                 "programacion": 2
             }
         },
         {
+            "name": "Antón",
+            "cuerpo": "Ingeniería",
+            "is_sano": true,
+            "is_contagiado": false,
+            "is_criogenizado": false,
+            "rango": "programador",
+            "id": "DABEST",
+            "uuid": "afecc5fa-42da-455e-802e-05a79e48f1de",
+            "auth": ["crew", "engineer"],
+            "attrs": {
+                "ciencia": 0,
+                "constitucion": 1,
+                "mecanica": 2,
+                "combate": 0,
+                "credibilidad": 0,
+                "programacion": 7
+            }
+        },
+        {
             "name": "Cyber",
-            "vida": 3,
+            "cuerpo": "Ingeniería",
             "is_sano": true,
             "is_contagiado": false,
             "is_criogenizado": false,
@@ -33,14 +52,14 @@
                 "ciencia": 0,
                 "constitucion": 1,
                 "mecanica": 2,
-                "pelea": 0,
-                "prestigio": 0,
+                "combate": 0,
+                "credibilidad": 0,
                 "programacion": 7
             }
         },
         {
             "name": "Max",
-            "vida": 3,
+            "cuerpo": "Ingeniería",
             "is_sano": true,
             "is_contagiado": false,
             "is_criogenizado": false,
@@ -52,14 +71,14 @@
                 "ciencia": 0,
                 "constitucion": 2,
                 "mecanica": 0,
-                "pelea": 3,
-                "prestigio": 5,
+                "combate": 3,
+                "credibilidad": 5,
                 "programacion": 0
             }
         },
         {
             "name": "Brute",
-            "vida": 3,
+            "cuerpo": "Ingeniería",
             "is_sano": true,
             "is_contagiado": false,
             "is_criogenizado": false,
@@ -71,14 +90,14 @@
                 "ciencia": 0,
                 "constitucion": 2,
                 "mecanica": 2,
-                "pelea": 4,
-                "prestigio": 2,
+                "combate": 4,
+                "credibilidad": 2,
                 "programacion": 0
             }
         },
         {
             "name": "Smarty",
-            "vida": 3,
+            "cuerpo": "Ingeniería",
             "is_sano": true,
             "is_contagiado": false,
             "is_criogenizado": false,
@@ -90,8 +109,8 @@
                 "ciencia": 5,
                 "constitucion": 2,
                 "mecanica": 0,
-                "pelea": 1,
-                "prestigio": 2,
+                "combate": 1,
+                "credibilidad": 2,
                 "programacion": 0
             }
         }
