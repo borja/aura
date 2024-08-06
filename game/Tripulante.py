@@ -2,16 +2,16 @@ class Atributos:
     ciencia: int
     constitucion: int
     mecanica: int
-    pelea: int
-    prestigio: int
+    combate: int
     programacion: int
+    credibilidad: int
 
     def __init__(self, stats: dict):
         self.ciencia = stats["ciencia"]
         self.constitucion = stats["constitucion"]
         self.mecanica = stats["mecanica"]
-        self.pelea = stats["pelea"]
-        self.prestigio = stats["prestigio"]
+        self.combate = stats["combate"]
+        self.credibilidad = stats["credibilidad"]
         self.programacion = stats["programacion"]
 
 class Tripulante:
@@ -21,6 +21,7 @@ class Tripulante:
     rango: str
     permisos: list[str]
     vida: int
+    prestigio: int
     estado: str
     is_sano: bool
     is_contagiado: bool
@@ -38,6 +39,7 @@ class Tripulante:
         self.is_contagiado = crewmate["is_contagiado"]
         self.is_criogenizado = crewmate["is_criogenizado"]
         self.atributos = Atributos(crewmate["attrs"])
+        self.prestigio = self.atributos.credibilidad
         self.estado = dime_estado(self.vida, self.is_sano, self.is_contagiado, self.is_criogenizado)
 
 def dime_estado(vida: int, is_sano: bool, is_contagiado: bool, is_criogenizado: bool):

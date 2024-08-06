@@ -105,15 +105,17 @@ def say(state: Bot, user: User, command_text: str):
 def describe_crew(state: Bot, user: Bot, tripulante):
     member = next((mem for mem in state.crew if mem.id == tripulante), None)
 
-    if member == None:
+    if member is None:
+        print(colored(f" ⚠️ El tripulante: {tripulante} no existe",'yellow'))
         return "Este tripulante no existe"
-
-    return f"""
+    else:
+        print(colored(f" 🤖 SCAN - Resultado del tripulante: {member.name}",'green'))
+        return f"""
 *INFORME DE TRIPULANTE*
 
     *Nombre*: {member.name}
     *Asignación*: {member.rango}
-    *Prestigio* {member.atributos.prestigio}
+    *Prestigio* {member.prestigio}
     *Salud*: {member.estado}
     """
 
