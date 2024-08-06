@@ -104,7 +104,14 @@ def say(state: Bot, user: User, command_text: str):
 
 def describe_crew(tripulante):
     #TODO: This will provide info about crew members
-    return f"CREW: {tripulante}"
+    return f"""
+*INFORME DE TRIPULANTE*
+
+    *Nombre*: {tripulante}
+    *Asignación*: {'ciencia'}
+    *Prestigio* {0}
+    *Salud*: {'sano'}
+    """
 
 def scan(state: Bot, user: Bot,  command_text: str):
     re_match = re.search("^[^ ]+", command_text.lower())
@@ -112,13 +119,13 @@ def scan(state: Bot, user: Bot,  command_text: str):
     args = command_text[re_match.end(0)+1:].split(' ')
 
     match command:
-        case 'crew':
-            print(colored(f"🔎 SCAN CODE command: {command} received, with args: ",'blue'))
+        case 'crew' | 'tripulante':
+            print(colored(f" 🔎 SCAN CODE command: {command} received, with args: ",'blue'))
             return describe_crew(args)
-        case 'room':
+        case 'room' | 'sala':
             print(colored(f" ⚠️ WARNING: SCAN feature for command: {command}, {args} is not implemented",'yellow'))
             return " ⚠️ WARNING: Esta feature no ha sido implementada"
-        case 'test':
+        case 'test' | 'analiza':
             print(colored(f" ⚠️ WARNING: SCAN feature for command: {command}, {args} is not implemented",'yellow'))
             return " ⚠️ WARNING: Esta feature no ha sido implementada"
         case _:
