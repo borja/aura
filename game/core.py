@@ -114,6 +114,7 @@ def describe_crew(state: Bot, user: Bot, tripulante):
 *INFORME DE TRIPULANTE*
 
     *Nombre*: {member.name}
+    *Cuerpo*: {member.cuerpo}
     *Asignación*: {member.rango}
     *Prestigio* {member.prestigio}
     *Salud*: {member.estado}

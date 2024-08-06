@@ -18,6 +18,7 @@ class Tripulante:
     uuid: str
     id: str
     name: str
+    cuerpo: str
     rango: str
     permisos: list[str]
     vida: int
@@ -32,9 +33,10 @@ class Tripulante:
         self.id = crewmate["id"]
         self.uuid = crewmate["uuid"]
         self.name = crewmate["name"]
+        self.cuerpo = crewmate["cuerpo"]
         self.rango = crewmate["rango"]
         self.permisos = crewmate["auth"]
-        self.vida = crewmate["vida"]
+        self.vida = 3
         self.is_sano = crewmate["is_sano"]
         self.is_contagiado = crewmate["is_contagiado"]
         self.is_criogenizado = crewmate["is_criogenizado"]
@@ -43,12 +45,12 @@ class Tripulante:
         self.estado = dime_estado(self.vida, self.is_sano, self.is_contagiado, self.is_criogenizado)
 
 def dime_estado(vida: int, is_sano: bool, is_contagiado: bool, is_criogenizado: bool):
-    if(vida == 0):
-        return "Saludando a Cerberos"
-    if(is_criogenizado):
-        return "Refrigerado"
-    if(is_contagiado):
-        return "Tiene una tos un poco chunga"
-    if(not is_sano):
-        return "Habrá recibido una paliza por bocazas"
-    return "Está como una rosa"
+    if vida < 0:
+        return '💀 MUERTO'
+    if is_criogenizado:
+        return '❄️ CRIOGENIZADO'
+    if is_contagiado:
+        return '☣️ INFECTADO'
+    if not is_sano:
+        return '😓 DÉBIL'
+    return '💚 SANO'

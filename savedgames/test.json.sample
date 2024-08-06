@@ -2,7 +2,7 @@
     "crew": [
         {
             "name": "AURA",
-            "vida": 1,
+            "cuerpo": "IA",
             "is_sano": true,
             "is_contagiado": false,
             "is_criogenizado": false,
@@ -21,7 +21,7 @@
         },
         {
             "name": "Antón",
-            "vida": 3,
+            "cuerpo": "Ingeniería",
             "is_sano": true,
             "is_contagiado": false,
             "is_criogenizado": false,
@@ -40,7 +40,7 @@
         },
         {
             "name": "Cyber",
-            "vida": 3,
+            "cuerpo": "Ingeniería",
             "is_sano": true,
             "is_contagiado": false,
             "is_criogenizado": false,
@@ -59,7 +59,7 @@
         },
         {
             "name": "Max",
-            "vida": 3,
+            "cuerpo": "Ingeniería",
             "is_sano": true,
             "is_contagiado": false,
             "is_criogenizado": false,
@@ -78,7 +78,7 @@
         },
         {
             "name": "Brute",
-            "vida": 3,
+            "cuerpo": "Ingeniería",
             "is_sano": true,
             "is_contagiado": false,
             "is_criogenizado": false,
@@ -97,7 +97,7 @@
         },
         {
             "name": "Smarty",
-            "vida": 3,
+            "cuerpo": "Ingeniería",
             "is_sano": true,
             "is_contagiado": false,
             "is_criogenizado": false,
