@@ -120,6 +120,20 @@ def describe_crew(state: Bot, user: Bot, tripulante):
     *Salud*: {member.estado}
     """
 
+def describe_room(state: Bot, user: Bot, sala):
+    room = next((r for r in state.arca.salas if r.id == sala), None)
+
+    if room is None:
+        print(colored(f" ⚠️ La sala: {room} no existe",'yellow'))
+        return "⚠️ La sala introducida no existe"
+    else:
+        print(colored(f" 🤖 SCAN - Resultado de la sala: {room.nombre}",'green'))
+        return f"""
+**{room.nombre}**
+Descripción: {room.descripcion}
+Aforo: {room.aforo} tripulantes
+"""
+
 def scan(state: Bot, user: Bot, command_text: str):
     re_match = re.search("^[^ ]+", command_text.lower())
     command = re_match[0]
@@ -130,8 +144,8 @@ def scan(state: Bot, user: Bot, command_text: str):
             print(colored(f" 🔎 SCAN CODE command: {command} received, with args: ",'blue'))
             return describe_crew(state, user, args[0])
         case 'room' | 'sala':
-            print(colored(f" ⚠️ WARNING: SCAN feature for command: {command}, {args} is not implemented",'yellow'))
-            return " ⚠️ WARNING: Esta feature no ha sido implementada"
+            print(colored(f" ⚠️ WARNING: SCAN feature for command: {command}, {args} is being implemented",'yellow'))
+            return describe_room(state, user, args[0])
         case 'test' | 'analiza':
             print(colored(f" ⚠️ WARNING: SCAN feature for command: {command}, {args} is not implemented",'yellow'))
             return " ⚠️ WARNING: Esta feature no ha sido implementada"
