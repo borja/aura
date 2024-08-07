@@ -35,9 +35,9 @@ class Telegram:
         app.run_polling(poll_interval=1)
 
 async def start_command(state: Bot, update: Update, context: ContextTypes.DEFAULT_TYPE):
-    code: str = update.message.text.replace("/start ", "")
+    code: str = update.message.text.replace("/start ", '')
     user = state.user(context._user_id)
-    if code != "":
+    if code != '':
         code = re.sub("__?", clean_start_command, code)
         re_match = re.search("^[^ ]+", code.lower())
         command = re_match[0]
