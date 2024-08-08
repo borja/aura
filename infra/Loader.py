@@ -8,6 +8,7 @@ from game.Tripulante import Atributos, Tripulante
 from infra.Settings import Settings
 
 default_load = {
+    'chatId': -1,
     'crew': [
         {
             'name': 'AURA',

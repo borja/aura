@@ -5,6 +5,7 @@ from game.Tripulante import Tripulante
 
 class User:
     id: int = -1
+    chatId: int = -1
     avatar: Optional[Tripulante] = None
 
     def __init__(self, id: int):
@@ -28,6 +29,12 @@ class User:
             avatar = self.avatar.uuid
         return {
             'id': self.id,
-            'avatar': avatar
+            'id': self.chatId,
+            'avatar': avatar,
         }
-
+    
+    def describe(self):
+        if self.avatar == None:
+            return f"U({self.id}) [sin rol]"
+        
+        return f"U({self.id}) [{self.avatar.name}, de {self.avatar.cuerpo}]"

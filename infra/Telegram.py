@@ -10,7 +10,7 @@ from game.User import User
 from infra.Loader import Loader
 from infra.Settings import Settings
 from infra.Texts import Texts
-from game.core import Bot, say, run, help, start, scan
+from game.core import Bot, register, say, run, help, start, scan
 from game.Arca import Arca
 
 class Telegram:
@@ -36,7 +36,10 @@ class Telegram:
 
 async def start_command(state: Bot, update: Update, context: ContextTypes.DEFAULT_TYPE):
     code: str = update.message.text.replace("/start ", '')
-    user = state.user(context._user_id)
+    chat_id = context._chat_id
+    if update.message.chat.type == 'group':
+        chat_id = None
+    user = state.user(context._user_id, chat_id)
     if code != '':
         code = re.sub("__?", clean_start_command, code)
         re_match = re.search("^[^ ]+", code.lower())
@@ -48,13 +51,21 @@ async def start_command(state: Bot, update: Update, context: ContextTypes.DEFAUL
         await update.message.reply_text(start(state, user, code), parse_mode=ParseMode.MARKDOWN_V2)
 
 async def help_command(state: Bot, update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user = state.user(context._user_id)
+    chat_id = context._chat_id
+    if update.message.chat.type == 'group':
+        chat_id = None
+
+    user = state.user(context._user_id, chat_id)
     await update.message.reply_text(help(state, user), parse_mode=ParseMode.MARKDOWN_V2)
 
 async def handle_message(state: Bot, update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = context._chat_id
     message_type: str = update.message.chat.type
     text: str = update.message.text
-    user = state.user(context._user_id)
+
+    if message_type == 'group':
+        chat_id = None
+    user = state.user(context._user_id, chat_id)
 
     command = ''
     rest = ''
@@ -76,18 +87,20 @@ async def handle_message(state: Bot, update: Update, context: ContextTypes.DEFAU
 
 async def handle_text_command(state: Bot, user: User, update: Update, context: ContextTypes.DEFAULT_TYPE, command: str, rest: str):
     match command:
-        case "ayuda" | "help":
+        case 'register' | 'reg' | 'r':
+            await update.message.reply_text(register(state, user, rest))
+        case 'ayuda' | 'help' | 'h':
             await update.message.reply_text(help(state,user), parse_mode=ParseMode.MARKDOWN_V2)
-        case "haz" | "ejecuta" | "orden":
+        case 'haz' | 'ejecuta' | 'orden' | 'x':
             await update.message.reply_text(run(state,user,rest), parse_mode=ParseMode.MARKDOWN_V2)
-        case "dime" | "imprime" | "informa" | "muestra":
+        case 'dime' | 'imprime' | 'informa' | 'muestra' | 'i':
             await update.message.reply_text(say(state,user,rest), parse_mode=ParseMode.MARKDOWN_V2)
-        case "scan":
+        case 'scan':
             await update.message.reply_text(scan(state,user,rest), parse_mode=ParseMode.MARKDOWN_V2)
-        case "hola" | "saludos" | "saludo":
+        case 'hola' | 'saludos' | 'saludo' | 'buenas' | 'w':
             await update.message.reply_text(state.txts.txt_saludo, parse_mode=ParseMode.MARKDOWN_V2)
         case _:
-            print(colored(f" ⚠️ - Invalid command request: {command}",'yellow'))
+            print(colored(f" ⚠️ - {user.describe()} has executed invalid command request: {command}",'yellow'))
             await update.message.reply_text(f"No existe el comando \"{command}\"")
 
 async def handle_error(state: Bot, update: Update, context: ContextTypes.DEFAULT_TYPE):
