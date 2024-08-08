@@ -102,7 +102,7 @@ def say(state: Bot, user: User, command_text: str):
             print(colored(f" ⚠️ - Invalid information request: {command}",'yellow'))
             return f"No existe información registrada para la propiedad: {command}"
 
-def describe_crew(state: Bot, user: Bot, tripulante):
+def describe_crew(state: Bot, user: User, tripulante):
     member = next((mem for mem in state.crew if mem.id == tripulante), None)
 
     if member is None:
@@ -120,7 +120,7 @@ def describe_crew(state: Bot, user: Bot, tripulante):
     *Salud*: {member.estado}
     """
 
-def describe_room(state: Bot, user: Bot, sala):
+def describe_room(state: Bot, user: User, sala):
     room = next((r for r in state.arca.salas if r.id == sala), None)
 
     if room is None:
@@ -134,7 +134,7 @@ Descripción: {room.descripcion}
 Aforo: {room.aforo} tripulantes
 """
 
-def scan(state: Bot, user: Bot, command_text: str):
+def scan(state: Bot, user: User, command_text: str):
     re_match = re.search("^[^ ]+", command_text.lower())
     command = re_match[0]
     args = command_text[re_match.end(0)+1:].split(' ')
@@ -152,3 +152,15 @@ def scan(state: Bot, user: Bot, command_text: str):
         case _:
             print(colored(f" ⚠️ - Invalid scan request: {command}",'yellow'))
             return f"🚫 No es viable realizar un análisis de tipo: {command}"            
+
+def register(state: Bot, user: User, command_text: str):
+    re_match = re.search("^[^ ]+", command_text.lower())
+    id_registro = re_match[0]
+
+    avatar = next((avatar for avatar in state.crew if avatar.uuid == id_registro), None)
+    if avatar == None:
+        print(colored(f" ⚠️ WARNING: Register with id {id_registro} failed",'yellow'))
+        return f"No exite ningún tripulante con la id indicada"
+
+    user.avatar = avatar
+    return state.txts.txt_saludo.replace('TRIPULANTE', avatar.name, 1)
