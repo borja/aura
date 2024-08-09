@@ -35,6 +35,7 @@ class Tripulante:
     rango: str = ''
     permisos: list[str] = []
     vida: int = 3
+    prestigio: int = 0
     estado: str = ''
     is_sano: bool = True
     is_contagiado: bool = False
@@ -56,6 +57,8 @@ class Tripulante:
         tripulante.is_criogenizado = fuente.get('is_criogenizado', False)
         tripulante.atributos = Atributos.from_dict(fuente)
         tripulante.estado = dime_estado(tripulante.vida, tripulante.is_sano, tripulante.is_contagiado, tripulante.is_criogenizado)
+        # El prestigio inicial es igual al atributo credibilidad
+        tripulante.prestigio = tripulante.atributos.credibilidad
 
         return tripulante
     
