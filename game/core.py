@@ -1,12 +1,9 @@
 import re
 
-from typing import Optional
 from termcolor import colored
-from game.Arca import Arca
 from game.Bot import Bot
-from game.Tripulante import Tripulante
 from game.User import User
-from infra.Texts import Texts
+import consts
 
 def start(state: Bot, user: User):
     return state.txts.txt_welcome
@@ -47,15 +44,14 @@ def run(state: Bot, user: User, command_text: str):
             print(colored(f" ⚠️ - Invalid command request: {command}",'yellow'))
             return f"El comando: '{command}' no está implementado en la interfaz AURA"
 
-def print_estado(sth):
-    auto_destr_msg = '⏲️ Programada' if sth.is_arca_autodestructing else '✅ Inactiva'
-    return f"""
-*ESTADO DEL ARCA*
-
-    🌡️ Temperatura interior: {sth.temperatura_interior}ºC
-    💥 Autodestrucción: {auto_destr_msg}
-    🛡️ {sth.estado_casco}% Estado estructural del blindaje
-"""
+def print_estado(state: Bot):
+    vida = state.arca.health
+    auto_destr_msg = '⏲️ Programada' if vida.is_arca_autodestructing else '✅ Inactiva'
+    return state.txts.build_text(consts.TXT_ESTADO, {
+        'temperatura': vida.temperatura_interior,
+        'auto_destr_msg': auto_destr_msg,
+        'estado_casco': vida.estado_casco,
+    })
 
 def say(state: Bot, user: User, command_text: str):
     re_match = re.search("^[^ ]+", command_text.lower())
@@ -63,28 +59,46 @@ def say(state: Bot, user: User, command_text: str):
     args = command_text[re_match.end(0)+1:].split(' ')
 
     match command:
+        case 'sobremi' | 'salud' | 'yo' | 'me' | 'mi' | 'yo?':
+            print(colored(f" 🤖 {command} - {user.describe()} asked about himself",'green'))
+            if user.avatar == None:
+                return 'Aún no has hecho login al sistema'
+            return state.txts.build_text(consts.TXT_DETALLE_TRIPULANTE, {
+                'nombre': user.avatar.name,
+                'puntos_vida': user.avatar.vida,
+                'estado': user.avatar.estado,
+                'cuerpo': user.avatar.cuerpo,
+                'rango': user.avatar.rango,
+                'permisos': str.join(', ', user.avatar.permisos),
+                'ciencia': user.avatar.atributos.ciencia,
+                'combate': user.avatar.atributos.combate,
+                'constitucion': user.avatar.atributos.constitucion,
+                'credibilidad': user.avatar.atributos.credibilidad,
+                'mecanica': user.avatar.atributos.mecanica,
+                'programacion': user.avatar.atributos.programacion,
+            })
 
-        case 'tripulación' | 'tripulantes':
+        case 'tripulacion' | 'tripulantes' | 'tripu' | 'crew':
             print(colored(f" 🤖 {command} - lista de tripulantes",'green'))
-            return state.txts.txt_tripulantes
+            return state.txts.build_text(consts.TXT_TRIPULANTES)
 
-        case 'salas' | 'dependencias' | 'aforo':
+        case 'salas' | 'dependencias' | 'aforo' | 'sala':
             print(colored(f" 🤖 {command} - lista de salas",'green'))
-            return state.txts.txt_salas
+            return state.txts.build_text(consts.TXT_SALAS)
 
-        case 'leyes' | 'LGJ6' :
+        case 'leyes' | 'LGJ6' | 'maximas':
             print(colored(f" 🤖 {command} - lista de Leyes",'green'))
-            return state.txts.txt_leyes
+            return state.txts.build_text(consts.TXT_LEYES)
 
-        case 'normas' | 'normativa' | 'reglas' | 'reglamento' :
+        case 'normas' | 'normativa' | 'reglas' | 'reglamento':
             print(colored(f" 🤖 {command} - lista de Reglas",'green'))
-            return state.txts.txt_normas
+            return state.txts.build_text(consts.TXT_NORMAS)
 
-        case 'estado':
+        case 'estado' | 'st' | 'nave':
             print(colored(f" 🤖 {command} - Estado del ARCA",'green'))
-            return print_estado(state.arca.health)
+            return print_estado(state)
 
-        case 'inventario':
+        case 'inventario' | 'inv':
             inventario = "INVENTARIO DE SUMINISTROS"
             for stock in state.arca.stocks:
                 cantidad = state.arca.stocks[stock].amount
@@ -93,10 +107,9 @@ def say(state: Bot, user: User, command_text: str):
             print(colored(f" 🤖 {command} - Inventario",'green'))
             return inventario
 
-        case 'combustible':
-            combustible_restante = 0
-            print(colored(f" 🤖 {command} - Restante: {combustible_restante}",'green'))
-            return f"Combustible restante: {combustible_restante} unidades"
+        case 'combustible' | 'fuel' | 'carburante':
+            print(colored(f" 🤖 {command} - Restante: {state.arca.combustible.restante}",'green'))
+            return f"Combustible restante: {state.arca.combustible.restante} unidades"
 
         case _:
             print(colored(f" ⚠️ - Invalid information request: {command}",'yellow'))
@@ -163,4 +176,6 @@ def register(state: Bot, user: User, command_text: str):
         return f"No exite ningún tripulante con la id indicada"
 
     user.avatar = avatar
-    return state.txts.txt_saludo.replace('TRIPULANTE', avatar.name, 1)
+    return state.txts.build_text(consts.TXT_SALUDO, {
+        'nombre_tripulante': avatar.name,
+    })

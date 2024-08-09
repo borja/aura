@@ -1,47 +1,33 @@
 from os.path import isfile, basename
+import re
 import glob
+
+_vars_re = re.compile('{([a-z_]+)}', re.RegexFlag.IGNORECASE)
 
 class Texts:
     path: str
-
-    txt_ayuda: str = ''
-    txt_leyes: str = ''
-    txt_normas: str = ''
-    txt_salas: str = ''
-    txt_saludo: str = ''
-    txt_tripulantes: str = ''
-    txt_welcome: str = ''
-    txt_scan: str = ''
+    raws: dict[str, str] = {}
 
     def __init__(self, path: str):
         self.path = path
         self.reload()
 
     def reload(self):
-        files = glob.glob(f"{self.path}/**.md")
+        self.raws = {}
+        files = glob.glob(f"{self.path}/**.html")
         for file in files:
             if isfile(file) is False:
                 continue
-            name = basename(file).replace('.md','')
+            name = str.lower(basename(file).replace('.html',''))
 
-            with open(file, mode='r', encoding='utf-8') as texto_interno:
-                # Command selector:
-                match name:
-                    case 'ayuda':
-                        self.txt_ayuda = texto_interno.read()
-                    case 'leyes':
-                        self.txt_leyes = texto_interno.read()
-                    case 'normas':
-                        self.txt_normas = texto_interno.read()
-                    case 'salas':
-                        self.txt_salas = texto_interno.read()
-                    case 'saludo':
-                        self.txt_saludo = texto_interno.read()
-                    case 'tripulantes':
-                        self.txt_tripulantes = texto_interno.read()
-                    case 'welcome':
-                        self.txt_welcome = texto_interno.read()
-                    case 'scan':
-                        self.txt_scan = texto_interno.read()
-                    case _:
-                        pass
+            with open(file, mode='r', encoding='utf-8') as mango_archivo:
+                self.raws[name] = mango_archivo.read()
+
+    def build_text(self, nombre_texto: str, reemplazos: dict[str, str] = {}):
+        fn = (lambda val: _replacer_fn(val, reemplazos))
+        texto = self.raws.get(nombre_texto, f"ERR404_TEXT_{nombre_texto}_ERR404")
+        return _vars_re.sub(fn, texto)
+
+def _replacer_fn(val: re.Match[str], reemplazos: dict[str, str]):
+    key = val.string[val.regs[1][0]:val.regs[1][1]]
+    return str(reemplazos.get(key, f"ERR404_VAR_{val[1]}_ERR404"))

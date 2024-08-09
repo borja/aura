@@ -48,7 +48,7 @@ async def start_command(state: Bot, update: Update, context: ContextTypes.DEFAUL
         print(colored(f" 🔎 SCAN CODE command received: {command}, with value: {rest}","blue"))
         await handle_text_command(state, user, update, context, command, rest)
     else:
-        await update.message.reply_text(start(state, user, code), parse_mode=ParseMode.MARKDOWN_V2)
+        await update.message.reply_text(start(state, user, code), parse_mode=ParseMode.HTML)
 
 async def help_command(state: Bot, update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = context._chat_id
@@ -56,7 +56,7 @@ async def help_command(state: Bot, update: Update, context: ContextTypes.DEFAULT
         chat_id = None
 
     user = state.user(context._user_id, chat_id)
-    await update.message.reply_text(help(state, user), parse_mode=ParseMode.MARKDOWN_V2)
+    await update.message.reply_text(help(state, user), parse_mode=ParseMode.HTML)
 
 async def handle_message(state: Bot, update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = context._chat_id
@@ -87,18 +87,18 @@ async def handle_message(state: Bot, update: Update, context: ContextTypes.DEFAU
 
 async def handle_text_command(state: Bot, user: User, update: Update, context: ContextTypes.DEFAULT_TYPE, command: str, rest: str):
     match command:
-        case 'register' | 'reg' | 'r':
+        case 'register' | 'reg' | 'login':
             await update.message.reply_text(register(state, user, rest))
         case 'ayuda' | 'help' | 'h':
-            await update.message.reply_text(help(state,user), parse_mode=ParseMode.MARKDOWN_V2)
+            await update.message.reply_text(help(state,user), parse_mode=ParseMode.HTML)
         case 'haz' | 'ejecuta' | 'orden' | 'x':
-            await update.message.reply_text(run(state,user,rest), parse_mode=ParseMode.MARKDOWN_V2)
-        case 'dime' | 'imprime' | 'informa' | 'muestra' | 'i':
-            await update.message.reply_text(say(state,user,rest), parse_mode=ParseMode.MARKDOWN_V2)
+            await update.message.reply_text(run(state,user,rest), parse_mode=ParseMode.HTML)
+        case 'dime' | 'di' | 'imprime' | 'informa' | 'muestra' | 'i' | 'y':
+            await update.message.reply_text(say(state,user,rest), parse_mode=ParseMode.HTML)
         case 'scan':
-            await update.message.reply_text(scan(state,user,rest), parse_mode=ParseMode.MARKDOWN_V2)
+            await update.message.reply_text(scan(state,user,rest), parse_mode=ParseMode.HTML)
         case 'hola' | 'saludos' | 'saludo' | 'buenas' | 'w':
-            await update.message.reply_text(state.txts.txt_saludo, parse_mode=ParseMode.MARKDOWN_V2)
+            await update.message.reply_text(state.txts.txt_saludo, parse_mode=ParseMode.HTML)
         case _:
             print(colored(f" ⚠️ - {user.describe()} has executed invalid command request: {command}",'yellow'))
             await update.message.reply_text(f"No existe el comando \"{command}\"")

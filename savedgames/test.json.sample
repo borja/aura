@@ -10,7 +10,7 @@
             "rango": "sistema",
             "id": "abf",
             "uuid": "f0f1104a-5464-40af-88b8-3e3af04a0aa9",
-            "permisos": ["admin"],
+            "permisos": ["admin", "god"],
             "attrs": {
                 "ciencia": 0,
                 "constitucion": 20,
