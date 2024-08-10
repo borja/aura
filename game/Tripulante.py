@@ -62,8 +62,7 @@ class Tripulante:
         tripulante.is_criogenizado = fuente.get('is_criogenizado', False)
         tripulante.atributos = Atributos.from_dict(fuente)
         tripulante.estado = dime_estado(tripulante.vida, tripulante.is_sano, tripulante.is_contagiado, tripulante.is_criogenizado)
-        # El prestigio inicial es igual al atributo credibilidad
-        tripulante.prestigio = tripulante.atributos.credibilidad
+        tripulante.prestigio = fuente.get('prestigio', tripulante.atributos.credibilidad)
 
         sala_id = fuente.get('sala', '')
         if sala_id != '':
@@ -80,6 +79,7 @@ class Tripulante:
             'rango': self.rango,
             'permisos': self.permisos,
             'vida': self.vida,
+            'prestigio': self.prestigio,
             'is_sano': self.is_sano,
             'is_contagiado': self.is_contagiado,
             'is_criogenizado': self.is_criogenizado,

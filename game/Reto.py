@@ -44,11 +44,14 @@ class Obstaculo:
             case 'programacion':
                 return atr.programacion >= self.requerimiento
 
+    def intentar(self, atr: Atributos):
+        pass
+
 
 class Reto:
     id: str = ''
-    name: str = ''
-    description: str = ''
+    nombre: str = ''
+    descripcion: str = ''
     sala: Optional[Sala] = None
     componentes: list[Obstaculo] = []
 
@@ -56,8 +59,8 @@ class Reto:
     def from_dict(fuente: dict[str, any], salas: list[Sala]):
         reto = Reto()
         reto.id = fuente.get('id', '')
-        reto.name = fuente.get('name', '')
-        reto.description = fuente.get('description', '')
+        reto.nombre = fuente.get('nombre', '')
+        reto.descripcion = fuente.get('descripcion', '')
 
         obstaculos_dict = fuente.get('componentes', [])
         reto.componentes = list(map((lambda obs_dict: Obstaculo.from_dict(obs_dict)), obstaculos_dict))
@@ -70,8 +73,8 @@ class Reto:
         obs = list(map((lambda obs: obs.to_dict()), self.componentes))
         return {
             'id': self.id,
-            'name': self.name,
-            'description': self.description,
+            'nombre': self.nombre,
+            'descripcion': self.descripcion,
             'sala': '' if self.sala == None else self.sala.id,
             'componentes': obs,
         }

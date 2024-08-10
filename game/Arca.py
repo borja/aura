@@ -121,7 +121,6 @@ class Sala:
         out_sala._asegurar_datos_atributos()
         return out_sala
 
-
 class Esclusa(Sala):
     is_output_open: bool = False
     is_input_open: bool = False
