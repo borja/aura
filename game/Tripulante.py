@@ -1,3 +1,7 @@
+from typing import Optional
+from game.Arca import Sala
+
+
 class Atributos:
     ciencia: int = 0
     combate: int = 0
@@ -40,10 +44,11 @@ class Tripulante:
     is_sano: bool = True
     is_contagiado: bool = False
     is_criogenizado: bool = False
+    sala: Optional[Sala] = None
     atributos: Atributos = Atributos()
 
     @staticmethod
-    def from_dict(fuente: dict[str, any]):
+    def from_dict(fuente: dict[str, any], salas: list[Sala]):
         tripulante = Tripulante()
         tripulante.id = fuente.get('id', 'ERR500')
         tripulante.uuid = fuente.get('uuid', 'ERR500-ERR500-ERR500')
@@ -60,6 +65,10 @@ class Tripulante:
         # El prestigio inicial es igual al atributo credibilidad
         tripulante.prestigio = tripulante.atributos.credibilidad
 
+        sala_id = fuente.get('sala', '')
+        if sala_id != '':
+            tripulante.sala = next((sala for sala in salas if sala.id == sala_id), None)
+
         return tripulante
     
     def to_dict(self):
@@ -74,6 +83,7 @@ class Tripulante:
             'is_sano': self.is_sano,
             'is_contagiado': self.is_contagiado,
             'is_criogenizado': self.is_criogenizado,
+            'sala': '' if self.sala == None else self.sala.id,
             'atributos': self.atributos.to_dict(),
         }
 

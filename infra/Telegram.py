@@ -6,6 +6,7 @@ from telegram import Update
 from telegram.constants import ParseMode
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
+import consts
 from game.User import User
 from infra.Loader import Loader
 from infra.Settings import Settings
@@ -98,7 +99,9 @@ async def handle_text_command(state: Bot, user: User, update: Update, context: C
         case 'scan':
             await update.message.reply_text(scan(state,user,rest), parse_mode=ParseMode.HTML)
         case 'hola' | 'saludos' | 'saludo' | 'buenas' | 'w':
-            await update.message.reply_text(state.txts.txt_saludo, parse_mode=ParseMode.HTML)
+            await update.message.reply_text(state.txts.build_text(consts.TXT_SALUDO, {
+                'nombre_tripulante': 'invitado' if user.avatar == None else user.avatar.name,
+            }), parse_mode=ParseMode.HTML)
         case _:
             print(colored(f" ⚠️ - {user.describe()} has executed invalid command request: {command}",'yellow'))
             await update.message.reply_text(f"No existe el comando \"{command}\"")

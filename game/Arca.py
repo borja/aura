@@ -177,19 +177,6 @@ class Esclusa(Sala):
             self.is_output_open = False
             print(colored(" 🤖 ESCLUSA-OUTPUT cerrada",'green'))
             return '↪️ ESCLUSA OUTPUT CERRADA'
-    
-    @staticmethod
-    def from_dict(fuente: dict[str, any]):
-        esclusa = Esclusa()
-        esclusa.is_output_open = fuente.get('is_output_open', False)
-        esclusa.is_input_open = fuente.get('is_input_open', False)
-        return esclusa
-    
-    def to_dict(self):
-        dict_esclusa = super().to_dict()
-        dict_esclusa["is_output_open"] = False
-        dict_esclusa["is_input_open"] = False
-        return dict_esclusa
 
 class Arca:
     # Estado general

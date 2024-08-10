@@ -6,10 +6,10 @@ from game.User import User
 import consts
 
 def start(state: Bot, user: User):
-    return state.txts.txt_welcome
+    return state.txts.build_text(consts.TXT_WELCOME)
 
 def help(state: Bot, user: User):
-    return state.txts.txt_ayuda
+    return state.txts.build_text(consts.TXT_AYUDA)
 
 def run(state: Bot, user: User, command_text: str):
     re_match = re.search("^[^ ]+", command_text.lower())
@@ -94,11 +94,11 @@ def say(state: Bot, user: User, command_text: str):
             print(colored(f" 🤖 {command} - lista de Reglas",'green'))
             return state.txts.build_text(consts.TXT_NORMAS)
 
-        case 'estado' | 'st' | 'nave':
+        case 'estado' | 'st' | 'nave' | 'arca':
             print(colored(f" 🤖 {command} - Estado del ARCA",'green'))
             return print_estado(state)
 
-        case 'inventario' | 'inv':
+        case 'inventario' | 'inv' | 'stock':
             inventario = "INVENTARIO DE SUMINISTROS"
             for stock in state.arca.stocks:
                 cantidad = state.arca.stocks[stock].amount
