@@ -1,5 +1,6 @@
 from os import read
 from typing import Union
+from termcolor import colored
 import json
 
 from game.Arca import Stock
@@ -11,15 +12,18 @@ default_load = {
     'chatId': -1,
     'crew': [
         {
+            'uuid': 'f0f1104a-5464-40af-88b8-3e3af04a0aa9',
+            'id': 'MJQJ5A',
             'name': 'AURA',
             'cuerpo': 'IA',
+            'rango': 'sistema',
+            'permisos': ['admin', 'god'],
+            'vida': 3,
+            'prestigio': 10,
             'is_sano': True,
             'is_contagiado': False,
             'is_criogenizado': False,
-            'rango': 'sistema',
-            'id': 'abf',
-            'uuid': 'f0f1104a-5464-40af-88b8-3e3af04a0aa9',
-            'permisos': ['admin'],
+            'sala': '',
             'attrs': {
                 'ciencia': 0,
                 'constitucion': 20,
@@ -30,15 +34,18 @@ default_load = {
             }
         },
         {
+            'uuid': '178e510b-379a-4794-8316-504233f3e4b2',
+            'id': 'DABEST',
             'name': 'Antón',
             'cuerpo': 'Ingeniería',
+            'rango': 'Cabeza líder y genio brillante del departamento de informática',
+            'permisos': ['mecanico','operador_esclusa'],
+            'vida': 3,
+            'prestigio': 0,
             'is_sano': True,
             'is_contagiado': False,
             'is_criogenizado': False,
-            'rango': 'programador',
-            'id': 'DABEST',
-            'uuid': 'afecc5fa-42da-455e-802e-05a79e48f1de',
-            'permisos': ['mecanico'],
+            'sala': 'OQENCR',
             'attrs': {
                 'ciencia': 0,
                 'constitucion': 1,
@@ -49,77 +56,265 @@ default_load = {
             }
         },
         {
-            'name': 'Gear',
-            'cuerpo': 'Ingeniería',
+            'uuid': '295c2ba2-8452-4aa0-9751-d05f538a7bea',
+            'id': 'TV2BS',
+            'name': 'Carlos',
+            'cuerpo': 'Militar',
+            'rango': 'Almirante',
+            'permisos': ['operador_esclusa','almirante','militar','medico','broadcast'],
+            'vida': 3,
+            'prestigio': 4,
             'is_sano': True,
             'is_contagiado': False,
             'is_criogenizado': False,
-            'rango': 'mecanico',
-            'id': 'abe',
-            'uuid': 'afecc5fa-82da-455e-802e-05a79e48f1de',
-            'permisos': ['mecanico'],
+            'sala': 'Q4IQQB',
             'attrs': {
                 'ciencia': 0,
                 'constitucion': 1,
-                'mecanica': 4,
-                'combate': 1,
-                'credibilidad': 1,
-                'programacion': 3
-            }
-        },
-        {
-            'name': 'Max',
-            'cuerpo': 'Ingeniería',
-            'is_sano': True,
-            'is_contagiado': False,
-            'is_criogenizado': False,
-            'rango': 'almirante',
-            'id': 'abd',
-            'uuid': 'cba92024-b70b-4931-84df-4e6adaa20660',
-            'permisos': ['almirante', 'militar', 'cientifico', 'mecanico'],
-            'attrs': {
-                'ciencia': 0,
-                'constitucion': 2,
                 'mecanica': 0,
-                'combate': 3,
-                'credibilidad': 5,
+                'combate': 2,
+                'credibilidad': 4,
                 'programacion': 0
             }
         },
         {
-            'name': 'Brute',
-            'cuerpo': 'Ingeniería',
+            'uuid': 'faa5bba9-ef93-49df-9d40-15702017e0a3',
+            'id': 'V5PBZ',
+            'name': 'Irene',
+            'cuerpo': 'Militar',
+            'rango': 'Delegado ejecutivo',
+            'permisos': ['militar'],
+            'vida': 3,
+            'prestigio': 3,
             'is_sano': True,
             'is_contagiado': False,
             'is_criogenizado': False,
-            'rango': 'militar',
-            'id': 'abc',
-            'uuid': 'fa2562e6-a959-4fc8-b524-162dfe1cd0fc',
-            'permisos': ['militar'],
+            'sala': 'RDPI8R',
             'attrs': {
                 'ciencia': 0,
-                'constitucion': 2,
-                'mecanica': 2,
-                'combate': 4,
+                'constitucion': 1,
+                'mecanica': 0,
+                'combate': 0,
+                'credibilidad': 3,
+                'programacion': 0
+            }
+        },
+        {
+            'uuid': '962d499e-dfe6-4009-b47d-0d30c3d83e15',
+            'id': 'GNEDP',
+            'name': 'Nóbel',
+            'cuerpo': 'Militar',
+            'rango': 'Delegado ejecutivo',
+            'permisos': ['militar'],
+            'vida': 3,
+            'prestigio': 2,
+            'is_sano': True,
+            'is_contagiado': False,
+            'is_criogenizado': False,
+            'sala': 'RDPI8R',
+            'attrs': {
+                'ciencia': 0,
+                'constitucion': 1,
+                'mecanica': 0,
+                'combate': 0,
                 'credibilidad': 2,
                 'programacion': 0
             }
         },
         {
-            'name': 'Smarty',
+            'uuid': '45f5300e-b067-4adf-a577-40a62917c5b3',
+            'id': '3CKYD',
+            'name': 'Nora',
             'cuerpo': 'Ingeniería',
+            'rango': '',
+            'permisos': [],
+            'vida': 3,
+            'prestigio': 4,
             'is_sano': True,
             'is_contagiado': False,
             'is_criogenizado': False,
-            'rango': 'cientifico',
-            'id': 'abg',
-            'uuid': 'b233abbe-6219-424c-afff-c11e49a2ba77',
-            'permisos': ['cientifico'],
+            'sala': 'RDPI8R',
             'attrs': {
-                'ciencia': 5,
-                'constitucion': 2,
+                'ciencia': 0,
+                'constitucion': 1,
                 'mecanica': 0,
-                'combate': 1,
+                'combate': 0,
+                'credibilidad': 4,
+                'programacion': 0
+            }
+        },
+        {
+            'uuid': '7b012d79-1eb7-466c-a049-e4da32ea0f61',
+            'id': 'EFPHU',
+            'name': 'Dan',
+            'cuerpo': 'Ingeniería',
+            'rango': '',
+            'permisos': [],
+            'vida': 3,
+            'prestigio': 1,
+            'is_sano': True,
+            'is_contagiado': False,
+            'is_criogenizado': False,
+            'sala': 'RDPI8R',
+            'attrs': {
+                'ciencia': 0,
+                'constitucion': 1,
+                'mecanica': 0,
+                'combate': 0,
+                'credibilidad': 1,
+                'programacion': 0
+            }
+        },
+        {
+            'uuid': '0b17b144-704a-49cd-b1a3-56f8eed9e173',
+            'id': 'JK16F',
+            'name': 'Edu',
+            'cuerpo': 'Ciencia',
+            'rango': '',
+            'permisos': [],
+            'vida': 3,
+            'prestigio': 1,
+            'is_sano': True,
+            'is_contagiado': False,
+            'is_criogenizado': False,
+            'sala': 'RDPI8R',
+            'attrs': {
+                'ciencia': 0,
+                'constitucion': 1,
+                'mecanica': 0,
+                'combate': 0,
+                'credibilidad': 1,
+                'programacion': 0
+            }
+        },
+        {
+            'uuid': '7f51d8d0-a531-43ba-bda2-c58a77dad621',
+            'id': 'PSK0H',
+            'name': 'Rubén',
+            'cuerpo': 'Ciencia',
+            'rango': '',
+            'permisos': [],
+            'vida': 3,
+            'prestigio': 2,
+            'is_sano': True,
+            'is_contagiado': False,
+            'is_criogenizado': False,
+            'sala': 'RDPI8R',
+            'attrs': {
+                'ciencia': 0,
+                'constitucion': 1,
+                'mecanica': 0,
+                'combate': 0,
+                'credibilidad': 2,
+                'programacion': 0
+            }
+        },
+        {
+            'uuid': 'de2a2b0f-884f-47c8-9f84-6fc3c5e7fbf7',
+            'id': 'JUZNM',
+            'name': 'Fran',
+            'cuerpo': 'Ciencia',
+            'rango': '',
+            'permisos': [],
+            'vida': 3,
+            'prestigio': 3,
+            'is_sano': True,
+            'is_contagiado': False,
+            'is_criogenizado': False,
+            'sala': 'RDPI8R',
+            'attrs': {
+                'ciencia': 0,
+                'constitucion': 1,
+                'mecanica': 0,
+                'combate': 0,
+                'credibilidad': 3,
+                'programacion': 0
+            }
+        },
+        {
+            'uuid': 'cf6a4062-dec9-48b1-814b-a3bfab666eed',
+            'id': '9ILOX',
+            'name': 'Reyes',
+            'cuerpo': 'Ciencia',
+            'rango': '',
+            'permisos': [],
+            'vida': 3,
+            'prestigio': 4,
+            'is_sano': True,
+            'is_contagiado': False,
+            'is_criogenizado': False,
+            'sala': 'RDPI8R',
+            'attrs': {
+                'ciencia': 0,
+                'constitucion': 1,
+                'mecanica': 0,
+                'combate': 0,
+                'credibilidad': 4,
+                'programacion': 0
+            }
+        },
+        {
+            'uuid': '8f66e442-dea3-4d5f-bf61-c4451526f9bd',
+            'id': 'IC0LJ',
+            'name': 'Bego',
+            'cuerpo': 'Ciencia',
+            'rango': '',
+            'permisos': [],
+            'vida': 3,
+            'prestigio': 1,
+            'is_sano': True,
+            'is_contagiado': False,
+            'is_criogenizado': False,
+            'sala': 'RDPI8R',
+            'attrs': {
+                'ciencia': 0,
+                'constitucion': 1,
+                'mecanica': 0,
+                'combate': 0,
+                'credibilidad': 1,
+                'programacion': 0
+            }
+        },
+        {
+            'uuid': '039ad41a-ab04-4fff-8fa5-1311aeabe490',
+            'id': 'UUIGX',
+            'name': 'Anastasia',
+            'cuerpo': 'Ciencia',
+            'rango': '',
+            'permisos': [],
+            'vida': 3,
+            'prestigio': 2,
+            'is_sano': True,
+            'is_contagiado': False,
+            'is_criogenizado': False,
+            'sala': 'RDPI8R',
+            'attrs': {
+                'ciencia': 0,
+                'constitucion': 1,
+                'mecanica': 0,
+                'combate': 0,
+                'credibilidad': 2,
+                'programacion': 0
+            }
+        },
+        {
+            'uuid': 'ea571990-85d9-4eed-b9dc-c95654c95eec',
+            'id': 'Y7STY',
+            'name': 'Samuel',
+            'cuerpo': 'Espero que Ingeniería',
+            'rango': '',
+            'permisos': [],
+            'vida': 3,
+            'prestigio': 2,
+            'is_sano': True,
+            'is_contagiado': False,
+            'is_criogenizado': False,
+            'sala': 'RDPI8R',
+            'attrs': {
+                'ciencia': 0,
+                'constitucion': 1,
+                'mecanica': 0,
+                'combate': 0,
                 'credibilidad': 2,
                 'programacion': 0
             }
@@ -230,6 +425,7 @@ default_load = {
                 'permisos': [],
                 'atributos': ['sellable'],
                 'datos': {
+                    'sellado': True,
                     'permisos_sellado': ['militar']
                 }
             },
@@ -243,6 +439,7 @@ default_load = {
                 'permisos': [],
                 'atributos': ['sellable'],
                 'datos': {
+                    'sellado': False,
                     'permisos_sellado': ['militar']
                 }
             },
@@ -339,7 +536,37 @@ default_load = {
             }
         ]
     },
-    'users': []
+    'users': [],
+    'retos': [
+        {
+            'id': 'XWUBFR',
+            'sala': '8UXBNK',
+            'activo': True,
+            'nombre': 'Cultivador algolosinas sala I',
+            'descripcion': 'Estructura que permite la generación de algososinas',
+            'componentes': [
+                {
+                    'tipo': 'ciencia',
+                    'requisito': 3,
+                    'dificultad': 5
+                }
+            ]
+        },
+        {
+            'id': 'UFIZQJ',
+            'sala': '1CFF0T',
+            'activo': True,
+            'nombre': 'Cultivador algolosinas sala II',
+            'descripcion': 'Estructura que permite la generación de algososinas',
+            'componentes': [
+                {
+                    'tipo': 'ciencia',
+                    'requisito': 3,
+                    'dificultad': 5
+                }
+            ]
+        }
+    ]
 }
 
 class Loader:
@@ -372,6 +599,7 @@ def _get_dict(method: str, endpoint: str):
 
 def _set_dict(method: str, endpoint: str, game_state: dict[str, any]):
     if( method != 'file'):
+        print(colored(f" ⚠️ Error while saving game: '{method}' is not a valid method",'yellow'))
         return
     with open(endpoint, mode='r+', encoding='utf-8') as handle:
         handle.write(json.dumps(game_state))

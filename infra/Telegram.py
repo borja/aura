@@ -2,9 +2,9 @@ import re
 
 from functools import partial
 from termcolor import colored
-from telegram import Update
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.constants import ParseMode
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, CallbackQueryHandler
 
 import consts
 from game.User import User
@@ -30,6 +30,7 @@ class Telegram:
         app.add_handler(CommandHandler("start", partial(start_command, state)))
         app.add_handler(CommandHandler("ayuda".capitalize(), partial(help_command, state)))
         app.add_handler(MessageHandler(filters.TEXT, partial(handle_message, state)))
+        app.add_handler(CallbackQueryHandler(partial(handle_button_callback, state)))
         app.add_error_handler(partial(handle_error, state))
 
         print(colored(' 🤖 AURA assistant is ready for duty','green'))
@@ -102,9 +103,34 @@ async def handle_text_command(state: Bot, user: User, update: Update, context: C
             await update.message.reply_text(state.txts.build_text(consts.TXT_SALUDO, {
                 'nombre_tripulante': 'invitado' if user.avatar == None else user.avatar.name,
             }), parse_mode=ParseMode.HTML)
+        case 'controlar':
+            if user.avatar == None or 'god' not in user.avatar.permisos:
+                print(colored(f" ⚠️ - {user.describe()} has tried to take control",'yellow'))
+                await update.message.reply_text(f"Lo siento, no puedo dejarte hacer eso")
+                return
+            print(colored(f" ⚠️ - {user.describe()} has taken control",'green'))
+            keyboard = [
+                [InlineKeyboardButton("Tripulantes", callback_data="crew")],
+                [InlineKeyboardButton("Pruebas", callback_data="trials"), InlineKeyboardButton("Salas", callback_data="salas")],
+                [
+                    InlineKeyboardButton('Guardar', callback_data='save'),
+                    InlineKeyboardButton('Cargar', callback_data='load'),
+                ],
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await update.message.reply_text('Control del ARCA', reply_markup=reply_markup)
         case _:
             print(colored(f" ⚠️ - {user.describe()} has executed invalid command request: {command}",'yellow'))
             await update.message.reply_text(f"No existe el comando \"{command}\"")
+
+async def handle_button_callback(state: Bot, update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    chat_id = context._chat_id
+    user = state.user(context._user_id, chat_id)
+    print(colored(f" ⚠️ - {user.describe()} pressed button",'green'))
+
+    await query.edit_message_text(text=f"Selected option: {query.data}")
 
 async def handle_error(state: Bot, update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(

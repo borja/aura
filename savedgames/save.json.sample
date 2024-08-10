@@ -3,7 +3,7 @@
     "crew": [
         {
             "uuid": "f0f1104a-5464-40af-88b8-3e3af04a0aa9",
-            "id": "abf",
+            "id": "MJQJ5A",
             "name": "AURA",
             "cuerpo": "IA",
             "rango": "sistema",
@@ -531,6 +531,7 @@
         {
             "id": "XWUBFR",
             "sala": "8UXBNK",
+            "activo": true,
             "nombre": "Cultivador algolosinas sala I",
             "descripcion": "Estructura que permite la generación de algososinas",
             "componentes": [
@@ -544,6 +545,7 @@
         {
             "id": "UFIZQJ",
             "sala": "1CFF0T",
+            "activo": true,
             "nombre": "Cultivador algolosinas sala II",
             "descripcion": "Estructura que permite la generación de algososinas",
             "componentes": [
