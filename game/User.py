@@ -16,6 +16,7 @@ class User:
     @staticmethod
     def from_dict(fuente: dict[str, any], tripulantes: list[Tripulante]):
         user = User(fuente.get('id', -1))
+        user.chatId = fuente.get('chatId', -1)
         tripulanteUuid = fuente.get('avatar', None)
         if tripulanteUuid == None:
             return user
@@ -31,7 +32,7 @@ class User:
             avatar = self.avatar.uuid
         return {
             'id': self.id,
-            'id': self.chatId,
+            'chatId': self.chatId,
             'avatar': avatar,
         }
     

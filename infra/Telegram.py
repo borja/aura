@@ -15,7 +15,7 @@ from infra.Loader import Loader
 from infra.Settings import Settings
 from infra.State import State
 from infra.Texts import Texts
-from game.core import controlar, keyboard_interaction, register, respuesta_dialogo_textual, say, run, help, start, scan
+from game.core import broadcast, controlar, keyboard_interaction, register, respuesta_dialogo_textual, say, run, help, start, scan
 from game.Arca import Arca
 
 class Telegram:
@@ -25,10 +25,10 @@ class Telegram:
         self.token = token
         game = Game()
         loader = Loader(config.save_endpoint, config.save_method)
-        state = State(config.bot_id, loader, game, texts)
         loader.load_into(game)
 
         app = Application.builder().token(token).build()
+        state = State(config.bot_id, app.bot, loader, game, texts)
 
         app.add_handler(CommandHandler("start", partial(start_command, state)))
         app.add_handler(CommandHandler("ayuda".capitalize(), partial(help_command, state)))
@@ -102,6 +102,8 @@ async def handle_text_command(state: State, user: User, update: Update, context:
             await update.message.reply_text(register(state, user, rest))
         case 'ayuda' | 'help' | 'h':
             await update.message.reply_text(help(state,user), parse_mode=ParseMode.HTML)
+        case 'broadcast' | 'all' | 'broad' | 'todos' | 'emitir':
+            await update.message.reply_text(await broadcast(state, user, rest), parse_mode=ParseMode.HTML)
         case 'haz' | 'ejecuta' | 'orden' | 'x':
             await update.message.reply_text(run(state,user,rest), parse_mode=ParseMode.HTML)
         case 'dime' | 'di' | 'imprime' | 'informa' | 'muestra' | 'i' | 'y':
@@ -113,11 +115,6 @@ async def handle_text_command(state: State, user: User, update: Update, context:
                 'nombre_tripulante': 'invitado' if user.avatar == None else user.avatar.name,
             }), parse_mode=ParseMode.HTML)
         case 'controlar':
-            if user.avatar == None or 'god' not in user.avatar.permisos:
-                print(colored(f" ⚠️ - {user.describe()} has tried to take control",'yellow'))
-                await update.message.reply_text(f"Lo siento, no puedo dejarte hacer eso")
-                return
-            print(colored(f" ⚠️ - {user.describe()} has taken control",'green'))
             result = controlar(state, user)
             await update.message.reply_text(result[0], reply_markup=result[1], parse_mode=ParseMode.HTML)
         case _:

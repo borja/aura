@@ -38,3 +38,10 @@ Requiere:
 TXT_SCAN_: Final[str] = 'scan'
 TXT_TRIPULANTES: Final[str] = 'tripulantes'
 TXT_WELCOME: Final[str] = 'welcome'
+TXT_BROADCAST: Final[str] = 'broadcast'
+"""
+Requiere:
+
+'nombre_tripulante': '',\\
+'mensaje': '',
+"""

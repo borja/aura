@@ -1,8 +1,10 @@
-import math
 from typing import Optional
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.constants import ParseMode
 import time
 import json
+import html
+import math
 import re
 
 from termcolor import colored
@@ -186,7 +188,30 @@ def register(state: State, user: User, command_text: str):
         'nombre_tripulante': avatar.name,
     })
 
+async def broadcast(state: State, user: User, command_text: str):
+    if user.avatar == None or ('admin' not in user.avatar.permisos and 'god' not in user.avatar.permisos and 'radiohost' not in user.avatar.permisos):
+        print(colored(f" ⚠️ - {user.describe()} has tried to broadcast",'yellow'))
+        return "No tienes permisos para mandar un comunicado a toda la nave"
+    
+    mensaje = state.txts.build_text(consts.TXT_BROADCAST, {
+        'nombre_tripulante': user.avatar.name,
+        'mensaje': html.escape(command_text),
+    })
+
+    for target_user in state.game.users:
+        if target_user.avatar == None or user.avatar.id == target_user.avatar.id:
+            continue
+        if target_user.chatId == -1:
+            continue
+        await state.bot.send_message(target_user.chatId, mensaje, parse_mode=ParseMode.HTML)
+
+    return 'Transmisión emitida'
+
 def controlar(state: State, user: User) -> tuple[str, Optional[InlineKeyboardMarkup]]:
+    if user.avatar == None or 'god' not in user.avatar.permisos:
+        print(colored(f" ⚠️ - {user.describe()} has tried to take control",'yellow'))
+        return [f"Lo siento, no puedo dejarte hacer eso", None]
+    print(colored(f" ⚠️ - {user.describe()} has taken control",'blue'))
     return ['Control del ARCA', root_control]
 
 
