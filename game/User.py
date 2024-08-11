@@ -1,12 +1,14 @@
 import re
 
 from typing import Optional
+from game.Dialogo import Dialogo
 from game.Tripulante import Tripulante
 
 class User:
     id: int = -1
     chatId: int = -1
     avatar: Optional[Tripulante] = None
+    dialogo: Optional[Dialogo] = None
 
     def __init__(self, id: int):
         self.id = id

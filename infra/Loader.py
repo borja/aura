@@ -4,7 +4,7 @@ from termcolor import colored
 import json
 
 from game.Arca import Stock
-from game.Bot import Bot
+from game.Game import Game
 from game.Tripulante import Atributos, Tripulante
 from infra.Settings import Settings
 
@@ -577,12 +577,12 @@ class Loader:
         self.save_endpoint = endpoint
         self.save_method = method
 
-    def load_into(self, bot: Bot):
+    def load_into(self, bot: Game):
         game_dict = _get_dict(self.save_method, self.save_endpoint)
 
         bot.load(game_dict)
 
-    def save_from(self, bot: Bot):
+    def save_from(self, bot: Game):
         game_dict = bot.to_dict()
         _set_dict(self.save_method, self.save_endpoint, game_dict)
         pass
@@ -601,5 +601,5 @@ def _set_dict(method: str, endpoint: str, game_state: dict[str, any]):
     if( method != 'file'):
         print(colored(f" ⚠️ Error while saving game: '{method}' is not a valid method",'yellow'))
         return
-    with open(endpoint, mode='r+', encoding='utf-8') as handle:
-        handle.write(json.dumps(game_state))
+    with open(endpoint, mode='w', encoding='utf-8') as handle:
+        handle.write(json.dumps(game_state, indent='    '))

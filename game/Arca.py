@@ -55,8 +55,8 @@ class Stock:
     def from_tuple(tuple: tuple[int, str]):
         return Stock(tuple[0], tuple[1])
     
-    def to_tuple(self):
-        return (self.amount, self.unit)
+    def to_tuple(self) -> tuple[int, str]:
+        return [self.amount, self.unit]
 
 ATR_ESCLUSA = 'esclusa'
 ATR_SELLABLE = 'sellable'
@@ -121,62 +121,6 @@ class Sala:
         out_sala._asegurar_datos_atributos()
         return out_sala
 
-class Esclusa(Sala):
-    is_output_open: bool = False
-    is_input_open: bool = False
-
-    def status(self):
-        if self.is_input_open is True:
-            return 'INPUT'
-        elif self.is_output_open is True:
-            return 'OUPUT'
-        else:
-            return 'NULL'
-
-    def open_input(self):
-        if self.is_input_open is True:
-            print(colored(" ⚠️ - ESCLUSA-INPUT is already OPEN",'yellow'))
-            return '⚠️ La esclusa INPUT ya estaba abierta'
-        else:
-            if self.is_output_open is True:
-                print(colored(" ⚠️ - ESCLUSA-OUTPUT is OPEN, cannot open INPUT",'yellow'))
-                return '🚫 No se ha podido realizar: La esclusa OUTPUT está abierta'
-            else:
-                self.is_input_open = True
-                print(colored(' 🤖 ESCLUSA: input abierto','green'))
-                return '↪️ ESCLUSA INPUT ABIERTA'
-        
-    def open_output(self):
-        if self.is_output_open is True:
-            print(colored(" ⚠️ - ESCLUSA-OUTPUT is already OPEN",'yellow'))
-            return '⚠️ La esclusa OUTPUT ya estaba abierta'
-        else:
-            if self.is_input_open is True:
-                print(colored(" ⚠️ - ESCLUSA-INTPUT is OPEN, cannot open OUTPUT",'yellow'))
-                return '🚫 No se ha podido realizar: La esclusa INPUT está abierta'
-            else:
-                self.is_output_open = True
-                print(colored(' 🤖 ESCLUSA: output abierto','green'))
-                return '↪️ ESCLUSA OUTPUT ABIERTA'
-
-    def close_input(self):
-        if self.is_input_open is False:
-            print(colored(" ⚠️ - ESCLUSA-INPUT is already CLOSED",'yellow'))
-            return '⚠️ La esclusa INPUT ya estaba cerrada'
-        else:
-            self.is_input_open = False
-            print(colored(" 🤖 ESCLUSA-INPUT cerrada",'green'))
-            return '↪️ ESCLUSA INPUT CERRADA'
-
-    def close_output(self):
-        if self.is_output_open is False:
-            print(colored(" ⚠️ - ESCLUSA-OUTPUT is already CLOSED",'yellow'))
-            return '⚠️ La esclusa OUTPUT ya estaba cerrada'
-        else:
-            self.is_output_open = False
-            print(colored(" 🤖 ESCLUSA-OUTPUT cerrada",'green'))
-            return '↪️ ESCLUSA OUTPUT CERRADA'
-
 class Arca:
     # Estado general
     health: Health = Health()
@@ -205,7 +149,7 @@ class Arca:
         return arca
 
     def to_dict(self):
-        stocks = dict[str, dict[str, tuple[int, str]]]
+        stocks = dict[str, tuple[int, str]]()
         for stock, value in self.stocks.items():
             stocks[stock] = value.to_tuple()
         return {

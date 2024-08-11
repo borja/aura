@@ -82,6 +82,8 @@ class Reto:
         sala_id = fuente.get('sala', '')
         if sala_id != '':
             reto.sala = next((sala for sala in salas if sala.id == sala_id), None)
+        
+        return reto
 
     def to_dict(self):
         obs = list(map((lambda obs: obs.to_dict()), self.componentes))

@@ -1,25 +1,31 @@
+import math
+from typing import Optional
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+import time
+import json
 import re
 
 from termcolor import colored
-from game.Bot import Bot
+from game.Dialogo import Dialogo, DIALOGOS_CONTROL, root_control
 from game.User import User
+from infra.State import State
 import consts
 
-def start(state: Bot, user: User):
+def start(state: State, user: User):
     return state.txts.build_text(consts.TXT_WELCOME)
 
-def help(state: Bot, user: User):
+def help(state: State, user: User):
     return state.txts.build_text(consts.TXT_AYUDA)
 
-def run(state: Bot, user: User, command_text: str):
+def run(state: State, user: User, command_text: str):
     re_match = re.search("^[^ ]+", command_text.lower())
     command = re_match[0]
     args = command_text[re_match.end(0)+1:].split(' ')
 
     match command:
         case 'autodestrucción' | 'autodestruccion':
-            if state.arca.health.is_arca_autodestructing is False:
-                state.arca.health.is_arca_autodestructing = True
+            if state.game.arca.health.is_arca_autodestructing is False:
+                state.game.arca.health.is_arca_autodestructing = True
                 print(colored(f" 🤖 {command} - Autodestrucción INICIADA",'green'))
                 return 'Autodestrucción programada para dentro de 30 minutos'
             else:
@@ -27,8 +33,8 @@ def run(state: Bot, user: User, command_text: str):
                 return 'Autodestrucción ya había sido iniciada'
 
         case 'abortar':
-            if state.arca.health.is_arca_autodestructing:
-                state.arca.health.is_arca_autodestructing = False
+            if state.game.arca.health.is_arca_autodestructing:
+                state.game.arca.health.is_arca_autodestructing = False
                 print(colored(f" 🤖 {command} - Autodestrucción abortada",'green'))
                 return 'Autodestrucción abortada'
             else:
@@ -36,16 +42,16 @@ def run(state: Bot, user: User, command_text: str):
                 return 'No existe una secuencia de autodestrucción inicializada.'
 
         case 'consumir':
-            state.arca.stocks["algolosina"].amount -= 1
-            print(colored(f" 🤖 {command} - 1 algolosina. Restantes: {state.arca.stocks["algolosina"].amount}",'green'))
+            state.game.arca.stocks["algolosina"].amount -= 1
+            print(colored(f" 🤖 {command} - 1 algolosina. Restantes: {state.game.arca.stocks["algolosina"].amount}",'green'))
             return 'Se han consumido 1 algolosina'
 
         case _:
             print(colored(f" ⚠️ - Invalid command request: {command}",'yellow'))
             return f"El comando: '{command}' no está implementado en la interfaz AURA"
 
-def print_estado(state: Bot):
-    vida = state.arca.health
+def print_estado(state: State):
+    vida = state.game.arca.health
     auto_destr_msg = '⏲️ Programada' if vida.is_arca_autodestructing else '✅ Inactiva'
     return state.txts.build_text(consts.TXT_ESTADO, {
         'temperatura': vida.temperatura_interior,
@@ -53,7 +59,7 @@ def print_estado(state: Bot):
         'estado_casco': vida.estado_casco,
     })
 
-def say(state: Bot, user: User, command_text: str):
+def say(state: State, user: User, command_text: str):
     re_match = re.search("^[^ ]+", command_text.lower())
     command = re_match[0]
     args = command_text[re_match.end(0)+1:].split(' ')
@@ -100,23 +106,23 @@ def say(state: Bot, user: User, command_text: str):
 
         case 'inventario' | 'inv' | 'stock':
             inventario = "INVENTARIO DE SUMINISTROS"
-            for stock in state.arca.stocks:
-                cantidad = state.arca.stocks[stock].amount
-                unidad = state.arca.stocks[stock].unit
+            for stock in state.game.arca.stocks:
+                cantidad = state.game.arca.stocks[stock].amount
+                unidad = state.game.arca.stocks[stock].unit
                 inventario += f"\n{stock.capitalize()} {cantidad}{unidad}"
             print(colored(f" 🤖 {command} - Inventario",'green'))
             return inventario
 
         case 'combustible' | 'fuel' | 'carburante':
-            print(colored(f" 🤖 {command} - Restante: {state.arca.combustible.restante}",'green'))
-            return f"Combustible restante: {state.arca.combustible.restante} unidades"
+            print(colored(f" 🤖 {command} - Restante: {state.game.arca.combustible.restante}",'green'))
+            return f"Combustible restante: {state.game.arca.combustible.restante} unidades"
 
         case _:
             print(colored(f" ⚠️ - Invalid information request: {command}",'yellow'))
             return f"No existe información registrada para la propiedad: {command}"
 
-def describe_crew(state: Bot, user: User, tripulante):
-    member = next((mem for mem in state.crew if mem.id == tripulante), None)
+def describe_crew(state: State, user: User, tripulante):
+    member = next((mem for mem in state.game.crew if mem.id == tripulante), None)
 
     if member is None:
         print(colored(f" ⚠️ El tripulante: {tripulante} no existe",'yellow'))
@@ -133,8 +139,8 @@ def describe_crew(state: Bot, user: User, tripulante):
     *Salud*: {member.estado}
     """
 
-def describe_room(state: Bot, user: User, sala):
-    room = next((r for r in state.arca.salas if r.id == sala), None)
+def describe_room(state: State, user: User, sala):
+    room = next((r for r in state.game.arca.salas if r.id == sala), None)
 
     if room is None:
         print(colored(f" ⚠️ La sala: {room} no existe",'yellow'))
@@ -147,7 +153,7 @@ Descripción: {room.descripcion}
 Aforo: {room.aforo} tripulantes
 """
 
-def scan(state: Bot, user: User, command_text: str):
+def scan(state: State, user: User, command_text: str):
     re_match = re.search("^[^ ]+", command_text.lower())
     command = re_match[0]
     args = command_text[re_match.end(0)+1:].split(' ')
@@ -164,13 +170,13 @@ def scan(state: Bot, user: User, command_text: str):
             return " ⚠️ WARNING: Esta feature no ha sido implementada"
         case _:
             print(colored(f" ⚠️ - Invalid scan request: {command}",'yellow'))
-            return f"🚫 No es viable realizar un análisis de tipo: {command}"            
+            return f"🚫 No es viable realizar un análisis de tipo: {command}"
 
-def register(state: Bot, user: User, command_text: str):
+def register(state: State, user: User, command_text: str):
     re_match = re.search("^[^ ]+", command_text.lower())
     id_registro = re_match[0]
 
-    avatar = next((avatar for avatar in state.crew if avatar.uuid == id_registro), None)
+    avatar = next((avatar for avatar in state.game.crew if avatar.uuid == id_registro), None)
     if avatar == None:
         print(colored(f" ⚠️ WARNING: Register with id {id_registro} failed",'yellow'))
         return f"No exite ningún tripulante con la id indicada"
@@ -179,3 +185,100 @@ def register(state: Bot, user: User, command_text: str):
     return state.txts.build_text(consts.TXT_SALUDO, {
         'nombre_tripulante': avatar.name,
     })
+
+def controlar(state: State, user: User) -> tuple[str, Optional[InlineKeyboardMarkup]]:
+    return ['Control del ARCA', root_control]
+
+
+PAGE_ITEMS = 10
+def keyboard_interaction(state: State, user: User, dialog: Dialogo) -> tuple[str, Optional[InlineKeyboardMarkup]]:
+    match dialog.ruta.split('/'):
+        case [DIALOGOS_CONTROL]:
+            return ['Control del ARCA', root_control]
+        case [DIALOGOS_CONTROL, 'x']:
+            return ['Control finalizado', None]
+        case [DIALOGOS_CONTROL, 'save']:
+            state.loader.save_from(state.game)
+            return [f"Control del ARCA\n<i>Guardado {time.time()}</i>", root_control]
+        case [DIALOGOS_CONTROL, 'load']:
+            state.loader.load_into(state.game)
+            return [f"Control del ARCA\n<i>Cargado {time.time()}</i>", root_control]
+        case [DIALOGOS_CONTROL, 'crew']:
+            page = dialog.data if dialog.data != None else 0
+            options: list[list[InlineKeyboardButton]] = []
+
+            for i in range(0+(PAGE_ITEMS*page),(PAGE_ITEMS*page)+PAGE_ITEMS):
+                if len(state.game.crew) <= i:
+                    break
+                member = state.game.crew[i]
+                options.append([InlineKeyboardButton(member.name, callback_data=json.dumps(dialog.clone(f"{DIALOGOS_CONTROL}/crew/i", member.id).to_tuple()))])
+
+            mostrando = len(options)
+            pages = math.ceil( len(state.game.crew) / PAGE_ITEMS)
+            if (pages > 1) or (pages > 0 & mostrando == 0):
+                pagesButtons = list(map((lambda i: InlineKeyboardButton(str(i+1), callback_data=json.dumps(dialog.clone(f"{DIALOGOS_CONTROL}/crew", i).to_tuple()))), [i for i in range(pages) if i != page]))
+                options.append(pagesButtons)
+            options.append([InlineKeyboardButton("Atrás", callback_data=json.dumps(dialog.clone('').to_tuple()))])
+
+            return [f"Mostrando {mostrando} tripulantes de {len(state.game.crew)}", InlineKeyboardMarkup(options)]
+        case [DIALOGOS_CONTROL, 'crew', 'i']:
+            tripulante = next((mem for mem in state.game.crew if mem.id == dialog.data), None)
+            if tripulante == None:
+                return [f"Ha habido un problema para encontrar al tripulante", root_control]
+            return ["Ruta crew/i aún no implementada", root_control]
+        case [DIALOGOS_CONTROL, 'arca']:
+            return ["Ruta arca aún no implementada", root_control]
+        case [DIALOGOS_CONTROL, 'chl']:
+            page = dialog.data if dialog.data != None else 0
+            options: list[list[InlineKeyboardButton]] = []
+
+            for i in range(0+(PAGE_ITEMS*page),(PAGE_ITEMS*page)+PAGE_ITEMS):
+                if len(state.game.retos) <= i:
+                    break
+                reto = state.game.retos[i]
+                options.append([InlineKeyboardButton(reto.nombre, callback_data=json.dumps(dialog.clone(f"{DIALOGOS_CONTROL}/chl/i", reto.id).to_tuple()))])
+
+            mostrando = len(options)
+            pages = math.ceil( len(state.game.retos) / PAGE_ITEMS)
+            if (pages > 1) or (pages > 0 & mostrando == 0):
+                pagesButtons = list(map((lambda i: InlineKeyboardButton(str(i+1), callback_data=json.dumps(dialog.clone(f"{DIALOGOS_CONTROL}/chl", i).to_tuple()))), [i for i in range(pages) if i != page]))
+                options.append(pagesButtons)
+            options.append([InlineKeyboardButton("Atrás", callback_data=json.dumps(dialog.clone('').to_tuple()))])
+
+            return [f"Mostrando {mostrando} retos de {len(state.game.retos)}", InlineKeyboardMarkup(options)]
+        case [DIALOGOS_CONTROL, 'chl', 'i']:
+            reto = next((reto for reto in state.game.retos if reto.id == dialog.data), None)
+            if reto == None:
+                return [f"Ha habido un problema para encontrar el reto", root_control]
+            return ["Ruta chl/i aún no implementada", root_control]
+        case [DIALOGOS_CONTROL, 'loc']:
+            page = dialog.data if dialog.data != None else 0
+            options: list[list[InlineKeyboardButton]] = []
+
+            for i in range(0+(PAGE_ITEMS*page),(PAGE_ITEMS*page)+PAGE_ITEMS):
+                if len(state.game.arca.salas) <= i:
+                    break
+                sala = state.game.arca.salas[i]
+                options.append([InlineKeyboardButton(sala.nombre, callback_data=json.dumps(dialog.clone(f"{DIALOGOS_CONTROL}/loc/i", sala.id).to_tuple()))])
+
+            mostrando = len(options)
+            pages = math.ceil( len(state.game.arca.salas) / PAGE_ITEMS)
+            if (pages > 1) or (pages > 0 & mostrando == 0):
+                pagesButtons = list(map((lambda i: InlineKeyboardButton(str(i+1), callback_data=json.dumps(dialog.clone(f"{DIALOGOS_CONTROL}/loc", i).to_tuple()))), [i for i in range(pages) if i != page]))
+                options.append(pagesButtons)
+            options.append([InlineKeyboardButton("Atrás", callback_data=json.dumps(dialog.clone('').to_tuple()))])
+
+            return [f"Mostrando {mostrando} salas de {len(state.game.arca.salas)}", InlineKeyboardMarkup(options)]
+        case [DIALOGOS_CONTROL, 'loc', 'i']:
+            sala = next((sala for sala in state.game.arca.salas if sala.id == dialog.data), None)
+            if sala == None:
+                return [f"Ha habido un problema para encontrar la sala", root_control]
+            return ["Ruta loc/i aún no implementada", root_control]
+        case _:
+            return ['Unexpected path', None]
+
+def respuesta_dialogo_textual(state: State, user: User, dialog: Dialogo, text: str):
+    user.dialogo = None
+    if dialog.data == None:
+        return 'Fallo a la hora de determinar qué propiedad cambiar'
+    return 'Actualmente no está implementado responder a inputs'

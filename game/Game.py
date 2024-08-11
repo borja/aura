@@ -1,5 +1,3 @@
-import re
-
 from typing import Optional
 from game.Arca import Arca
 from game.Reto import Reto
@@ -7,19 +5,12 @@ from game.Tripulante import Tripulante
 from game.User import User
 from infra.Texts import Texts
 
-class Bot:
-    id: str
+class Game:
     chatId: int = -1
-    txts: Texts
-    arca: Arca
+    arca: Arca = Arca()
     retos: list[Reto] = []
     crew: list[Tripulante] = []
     users: list[User] = []
-
-    def __init__(self, bot_id: str, arca: Arca, txts: Texts):
-        self.id = bot_id
-        self.arca = arca
-        self.txts = txts
 
     def user(self, id: int, chatId: Optional[int]):
         for user in self.users:
@@ -39,10 +30,13 @@ class Bot:
         self.arca = Arca.from_dict(fuente['arca'])
         crew: list[dict[str, any]] = fuente['crew']
         self.crew = list(map((lambda fuente_crew: Tripulante.from_dict(fuente_crew, self.arca.salas)), crew))
+        self.crew.sort(key=lambda tripu: tripu.name)
         users: list[dict[str, any]] = fuente['users']
         self.users = list(map((lambda fuente_users: User.from_dict(fuente_users, self.crew)), users))
+        self.users.sort(key=lambda user: user.id)
         retos: list[dict[str, any]] = fuente['retos']
         self.retos = list(map((lambda fuente_retos: Reto.from_dict(fuente_retos, self.arca.salas)), retos))
+        self.retos.sort(key=lambda reto: reto.nombre)
 
     def to_dict(self):
         return {

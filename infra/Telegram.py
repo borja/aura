@@ -1,17 +1,21 @@
+import json
 import re
 
 from functools import partial
 from termcolor import colored
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update
 from telegram.constants import ParseMode
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, CallbackQueryHandler
 
 import consts
+from game.Dialogo import Dialogo
+from game.Game import Game
 from game.User import User
 from infra.Loader import Loader
 from infra.Settings import Settings
+from infra.State import State
 from infra.Texts import Texts
-from game.core import Bot, register, say, run, help, start, scan
+from game.core import controlar, keyboard_interaction, register, respuesta_dialogo_textual, say, run, help, start, scan
 from game.Arca import Arca
 
 class Telegram:
@@ -19,11 +23,10 @@ class Telegram:
     def __init__(self, token: str, config: Settings, texts: Texts):
         print(colored(' 🤖 AURA assistant is initializing','green'))
         self.token = token
-        arca = Arca()
-        state = Bot(config.bot_id, arca, texts)
+        game = Game()
         loader = Loader(config.save_endpoint, config.save_method)
-
-        loader.load_into(state)
+        state = State(config.bot_id, loader, game, texts)
+        loader.load_into(game)
 
         app = Application.builder().token(token).build()
 
@@ -36,12 +39,12 @@ class Telegram:
         print(colored(' 🤖 AURA assistant is ready for duty','green'))
         app.run_polling(poll_interval=1)
 
-async def start_command(state: Bot, update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def start_command(state: State, update: Update, context: ContextTypes.DEFAULT_TYPE):
     code: str = update.message.text.replace("/start ", '')
     chat_id = context._chat_id
     if update.message.chat.type == 'group':
         chat_id = None
-    user = state.user(context._user_id, chat_id)
+    user = state.game.user(context._user_id, chat_id)
     if code != '':
         code = re.sub("__?", clean_start_command, code)
         re_match = re.search("^[^ ]+", code.lower())
@@ -52,22 +55,28 @@ async def start_command(state: Bot, update: Update, context: ContextTypes.DEFAUL
     else:
         await update.message.reply_text(start(state, user, code), parse_mode=ParseMode.HTML)
 
-async def help_command(state: Bot, update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def help_command(state: State, update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = context._chat_id
     if update.message.chat.type == 'group':
         chat_id = None
 
-    user = state.user(context._user_id, chat_id)
+    user = state.game.user(context._user_id, chat_id)
     await update.message.reply_text(help(state, user), parse_mode=ParseMode.HTML)
 
-async def handle_message(state: Bot, update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def handle_message(state: State, update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = context._chat_id
     message_type: str = update.message.chat.type
     text: str = update.message.text
 
     if message_type == 'group':
         chat_id = None
-    user = state.user(context._user_id, chat_id)
+    user = state.game.user(context._user_id, chat_id)
+
+    if user.dialogo != None:
+        clean_text = text.strip()
+        print(colored(f" ⚠️ - {user.describe()} has input dialog to modal {user.dialogo.tipo}/{user.dialogo.ruta}",'green'))
+        await update.message.reply_text(respuesta_dialogo_textual(state, user, user.dialogo, clean_text), parse_mode=ParseMode.HTML)
+        return
 
     command = ''
     rest = ''
@@ -87,7 +96,7 @@ async def handle_message(state: Bot, update: Update, context: ContextTypes.DEFAU
 
     await handle_text_command(state, user, update, context, command, rest)
 
-async def handle_text_command(state: Bot, user: User, update: Update, context: ContextTypes.DEFAULT_TYPE, command: str, rest: str):
+async def handle_text_command(state: State, user: User, update: Update, context: ContextTypes.DEFAULT_TYPE, command: str, rest: str):
     match command:
         case 'register' | 'reg' | 'login':
             await update.message.reply_text(register(state, user, rest))
@@ -109,30 +118,29 @@ async def handle_text_command(state: Bot, user: User, update: Update, context: C
                 await update.message.reply_text(f"Lo siento, no puedo dejarte hacer eso")
                 return
             print(colored(f" ⚠️ - {user.describe()} has taken control",'green'))
-            keyboard = [
-                [InlineKeyboardButton("Tripulantes", callback_data="crew")],
-                [InlineKeyboardButton("Pruebas", callback_data="trials"), InlineKeyboardButton("Salas", callback_data="salas")],
-                [
-                    InlineKeyboardButton('Guardar', callback_data='save'),
-                    InlineKeyboardButton('Cargar', callback_data='load'),
-                ],
-            ]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            await update.message.reply_text('Control del ARCA', reply_markup=reply_markup)
+            result = controlar(state, user)
+            await update.message.reply_text(result[0], reply_markup=result[1], parse_mode=ParseMode.HTML)
         case _:
             print(colored(f" ⚠️ - {user.describe()} has executed invalid command request: {command}",'yellow'))
             await update.message.reply_text(f"No existe el comando \"{command}\"")
 
-async def handle_button_callback(state: Bot, update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def handle_button_callback(state: State, update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.callback_query == None:
+        return
     query = update.callback_query
     await query.answer()
+
     chat_id = context._chat_id
-    user = state.user(context._user_id, chat_id)
-    print(colored(f" ⚠️ - {user.describe()} pressed button",'green'))
+    user = state.game.user(context._user_id, chat_id)
+    print(colored(f" ⚠️ - {user.describe()} pressed button for {query.data}",'green'))
 
-    await query.edit_message_text(text=f"Selected option: {query.data}")
+    dia = Dialogo.from_tuple(json.loads(query.data))
 
-async def handle_error(state: Bot, update: Update, context: ContextTypes.DEFAULT_TYPE):
+    response = keyboard_interaction(state, user, dia)
+
+    await query.edit_message_text(text=response[0], reply_markup=response[1], parse_mode=ParseMode.HTML)
+
+async def handle_error(state: State, update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(
         colored(' ❌ ERROR caused by context: ','red'), context.error,
         colored(update,'grey')

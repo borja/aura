@@ -60,7 +60,7 @@ class Tripulante:
         tripulante.is_sano = fuente.get('is_sano', True)
         tripulante.is_contagiado = fuente.get('is_contagiado', False)
         tripulante.is_criogenizado = fuente.get('is_criogenizado', False)
-        tripulante.atributos = Atributos.from_dict(fuente)
+        tripulante.atributos = Atributos.from_dict(fuente.get('attrs', {}))
         tripulante.estado = dime_estado(tripulante.vida, tripulante.is_sano, tripulante.is_contagiado, tripulante.is_criogenizado)
         tripulante.prestigio = fuente.get('prestigio', tripulante.atributos.credibilidad)
 
