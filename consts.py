@@ -45,3 +45,10 @@ Requiere:
 'nombre_tripulante': '',\\
 'mensaje': '',
 """
+TXT_MENSAJE: Final[str] = 'mensaje'
+"""
+Requiere:
+
+'nombre_tripulante': '',\\
+'mensaje': '',
+"""

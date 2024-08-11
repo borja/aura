@@ -7,6 +7,7 @@ from game.Tripulante import Tripulante
 class User:
     id: int = -1
     chatId: int = -1
+    outgoing_msg = ''
     avatar: Optional[Tripulante] = None
     dialogo: Optional[Dialogo] = None
 

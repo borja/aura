@@ -4,8 +4,9 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 import json
 
 DIALOGOS_CONTROL ='ctl'
+DIALOGOS_MENSAJE ='msg'
 DIALOGOS_SCAN_SALA = 'sal'
-DIALOGOS_RETO = 'ret'
+DIALOGOS_SCAN_RETO = 'ret'
 
 class Dialogo:
     ruta: str = DIALOGOS_CONTROL

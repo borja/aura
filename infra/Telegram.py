@@ -15,7 +15,7 @@ from infra.Loader import Loader
 from infra.Settings import Settings
 from infra.State import State
 from infra.Texts import Texts
-from game.core import broadcast, controlar, keyboard_interaction, register, respuesta_dialogo_textual, say, run, help, start, scan
+from game.core import broadcast, controlar, enviar_mensaje, keyboard_interaction, register, respuesta_dialogo_textual, say, run, help, start, scan
 from game.Arca import Arca
 
 class Telegram:
@@ -104,6 +104,9 @@ async def handle_text_command(state: State, user: User, update: Update, context:
             await update.message.reply_text(help(state,user), parse_mode=ParseMode.HTML)
         case 'broadcast' | 'all' | 'broad' | 'todos' | 'emitir':
             await update.message.reply_text(await broadcast(state, user, rest), parse_mode=ParseMode.HTML)
+        case 'msg' | 'mensaje' | 'susurro' | '':
+            respuesta = await enviar_mensaje(state, user, rest)
+            await update.message.reply_text(respuesta[0], reply_markup=respuesta[1], parse_mode=ParseMode.HTML)
         case 'haz' | 'ejecuta' | 'orden' | 'x':
             await update.message.reply_text(run(state,user,rest), parse_mode=ParseMode.HTML)
         case 'dime' | 'di' | 'imprime' | 'informa' | 'muestra' | 'i' | 'y':
@@ -133,7 +136,7 @@ async def handle_button_callback(state: State, update: Update, context: ContextT
 
     dia = Dialogo.from_tuple(json.loads(query.data))
 
-    response = keyboard_interaction(state, user, dia)
+    response = await keyboard_interaction(state, user, dia)
 
     await query.edit_message_text(text=response[0], reply_markup=response[1], parse_mode=ParseMode.HTML)
 

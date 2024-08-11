@@ -8,7 +8,7 @@ import math
 import re
 
 from termcolor import colored
-from game.Dialogo import Dialogo, DIALOGOS_CONTROL, root_control
+from game.Dialogo import Dialogo, DIALOGOS_CONTROL, DIALOGOS_MENSAJE, root_control
 from game.User import User
 from infra.State import State
 import consts
@@ -207,6 +207,33 @@ async def broadcast(state: State, user: User, command_text: str):
 
     return 'Transmisión emitida'
 
+async def enviar_mensaje(state: State, user: User, command_text: str) -> tuple[str, Optional[InlineKeyboardMarkup]]:
+    if user.avatar == None or ('admin' not in user.avatar.permisos and 'god' not in user.avatar.permisos and 'whisperer' not in user.avatar.permisos):
+        print(colored(f" ⚠️ - {user.describe()} has tried to whisper",'yellow'))
+        return ["No tienes permisos para mandar enviar mensajes a otros tripulantes", None]
+    
+    re_match = re.search("^[^ ]+", command_text.lower())
+    avatar_id = re_match[0]
+    mensaje_interno = command_text[re_match.end(0)+1:]
+    mensaje = state.txts.build_text(consts.TXT_MENSAJE, {
+        'nombre_tripulante': user.avatar.name,
+        'mensaje': html.escape(mensaje_interno),
+    })
+
+    if avatar_id == '?':
+        user.outgoing_msg = mensaje
+        return await keyboard_interaction(state, user, Dialogo(DIALOGOS_MENSAJE, 0))
+
+    target_user = next((g_user for g_user in state.game.users if g_user.avatar != None and g_user.avatar.id == avatar_id), None)
+    if target_user == None:
+        return ["No se ha podido encontrar el tripulante", None]
+    if target_user.chatId == -1:
+        return ["El tripulante no se ha registrado en una terminal válida", None]
+
+    await state.bot.send_message(target_user.chatId, mensaje, parse_mode=ParseMode.HTML)
+    return [f"Mensaje transmitido a {target_user.avatar.name}", None]
+
+
 def controlar(state: State, user: User) -> tuple[str, Optional[InlineKeyboardMarkup]]:
     if user.avatar == None or 'god' not in user.avatar.permisos:
         print(colored(f" ⚠️ - {user.describe()} has tried to take control",'yellow'))
@@ -216,19 +243,19 @@ def controlar(state: State, user: User) -> tuple[str, Optional[InlineKeyboardMar
 
 
 PAGE_ITEMS = 10
-def keyboard_interaction(state: State, user: User, dialog: Dialogo) -> tuple[str, Optional[InlineKeyboardMarkup]]:
-    match dialog.ruta.split('/'):
-        case [DIALOGOS_CONTROL]:
+async def keyboard_interaction(state: State, user: User, dialog: Dialogo) -> tuple[str, Optional[InlineKeyboardMarkup]]:
+    match dialog.ruta:
+        case 'ctl':
             return ['Control del ARCA', root_control]
-        case [DIALOGOS_CONTROL, 'x']:
+        case 'ctl/x':
             return ['Control finalizado', None]
-        case [DIALOGOS_CONTROL, 'save']:
+        case 'ctl/save':
             state.loader.save_from(state.game)
             return [f"Control del ARCA\n<i>Guardado {time.time()}</i>", root_control]
-        case [DIALOGOS_CONTROL, 'load']:
+        case 'ctl/load':
             state.loader.load_into(state.game)
             return [f"Control del ARCA\n<i>Cargado {time.time()}</i>", root_control]
-        case [DIALOGOS_CONTROL, 'crew']:
+        case 'ctl/crew':
             page = dialog.data if dialog.data != None else 0
             options: list[list[InlineKeyboardButton]] = []
 
@@ -246,14 +273,14 @@ def keyboard_interaction(state: State, user: User, dialog: Dialogo) -> tuple[str
             options.append([InlineKeyboardButton("Atrás", callback_data=json.dumps(dialog.clone('').to_tuple()))])
 
             return [f"Mostrando {mostrando} tripulantes de {len(state.game.crew)}", InlineKeyboardMarkup(options)]
-        case [DIALOGOS_CONTROL, 'crew', 'i']:
+        case 'ctl/crew/i':
             tripulante = next((mem for mem in state.game.crew if mem.id == dialog.data), None)
             if tripulante == None:
                 return [f"Ha habido un problema para encontrar al tripulante", root_control]
             return ["Ruta crew/i aún no implementada", root_control]
-        case [DIALOGOS_CONTROL, 'arca']:
+        case 'ctl/arca':
             return ["Ruta arca aún no implementada", root_control]
-        case [DIALOGOS_CONTROL, 'chl']:
+        case 'ctl/chl':
             page = dialog.data if dialog.data != None else 0
             options: list[list[InlineKeyboardButton]] = []
 
@@ -271,12 +298,12 @@ def keyboard_interaction(state: State, user: User, dialog: Dialogo) -> tuple[str
             options.append([InlineKeyboardButton("Atrás", callback_data=json.dumps(dialog.clone('').to_tuple()))])
 
             return [f"Mostrando {mostrando} retos de {len(state.game.retos)}", InlineKeyboardMarkup(options)]
-        case [DIALOGOS_CONTROL, 'chl', 'i']:
+        case 'ctl/chl/i':
             reto = next((reto for reto in state.game.retos if reto.id == dialog.data), None)
             if reto == None:
                 return [f"Ha habido un problema para encontrar el reto", root_control]
             return ["Ruta chl/i aún no implementada", root_control]
-        case [DIALOGOS_CONTROL, 'loc']:
+        case 'ctl/loc':
             page = dialog.data if dialog.data != None else 0
             options: list[list[InlineKeyboardButton]] = []
 
@@ -294,11 +321,44 @@ def keyboard_interaction(state: State, user: User, dialog: Dialogo) -> tuple[str
             options.append([InlineKeyboardButton("Atrás", callback_data=json.dumps(dialog.clone('').to_tuple()))])
 
             return [f"Mostrando {mostrando} salas de {len(state.game.arca.salas)}", InlineKeyboardMarkup(options)]
-        case [DIALOGOS_CONTROL, 'loc', 'i']:
+        case 'ctl/loc/i':
             sala = next((sala for sala in state.game.arca.salas if sala.id == dialog.data), None)
             if sala == None:
                 return [f"Ha habido un problema para encontrar la sala", root_control]
             return ["Ruta loc/i aún no implementada", root_control]
+        case 'msg':
+            page = dialog.data if dialog.data != None else 0
+            options: list[list[InlineKeyboardButton]] = []
+
+            valid_users = list(g_user for g_user in state.game.users if g_user.avatar != None and g_user.avatar.id != user.avatar.id)
+            if len(valid_users) < 1:
+                return ["No existe ningún usuario válido para mandar un mensaje", None]
+
+            for i in range(0+(PAGE_ITEMS*page),(PAGE_ITEMS*page)+PAGE_ITEMS):
+                if len(valid_users) <= i:
+                    break
+                member = valid_users[i]
+                options.append([InlineKeyboardButton(member.avatar.name, callback_data=json.dumps(Dialogo(f"{DIALOGOS_MENSAJE}/i", member.id).to_tuple()))])
+
+            mostrando = len(options)
+            pages = math.ceil( len(valid_users) / PAGE_ITEMS)
+            if (pages > 1) or (pages > 0 & mostrando == 0):
+                pagesButtons = list(map((lambda i: InlineKeyboardButton(str(i+1), callback_data=json.dumps(Dialogo(f"{DIALOGOS_MENSAJE}", i).to_tuple()))), [i for i in range(pages) if i != page]))
+                options.append(pagesButtons)
+            options.append([InlineKeyboardButton("Cancelar", callback_data=json.dumps(Dialogo(f"{DIALOGOS_MENSAJE}/x").to_tuple()))])
+
+            return [f"Elige a quien mandar el mensaje.\nMostrando {mostrando} tripulantes disponibles de {len(valid_users)}", InlineKeyboardMarkup(options)]
+        case 'msg/i':
+            target_user = next((g_user for g_user in state.game.users if g_user.id == dialog.data), None)
+            if target_user == None:
+                return ['El usuario parece haberse desconectado', None]
+            if target_user.chatId == -1:
+                return ["El tripulante no se ha registrado en una terminal válida", None]
+            await state.bot.send_message(target_user.chatId, user.outgoing_msg, parse_mode=ParseMode.HTML)
+            user.outgoing_msg = ''
+            return [f"El mensaje se ha enviado a {target_user.avatar.name}", None]
+        case 'msg/x':
+            return ['Se ha cancelado el mensaje', None]
         case _:
             return ['Unexpected path', None]
 
