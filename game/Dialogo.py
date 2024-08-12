@@ -6,8 +6,8 @@ import json
 DIALOGOS_CONTROL ='ctl'
 DIALOGOS_MENSAJE ='msg'
 DIALOGOS_SCAN_TRIPULANTE = 'mem'
-DIALOGOS_SCAN_SALA = 'sal'
-DIALOGOS_SCAN_RETO = 'ret'
+DIALOGOS_SCAN_SALA = 'loc'
+DIALOGOS_SCAN_RETO = 'chl'
 
 class Dialogo:
     ruta: str = DIALOGOS_CONTROL

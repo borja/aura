@@ -9,6 +9,7 @@ Requiere:
 'puntos_vida': '',\\
 'estado': '',\\
 'asignacion_tripulante': '',\\
+'localizacion_tripulante': '',\\
 'cuerpo': '',\\
 'rango': '',\\
 'permisos': '',\\
@@ -50,7 +51,7 @@ Requiere:
 'descripcion_sala': '',\\
 'extra': '',
 """
-TXT_SCAN_TRIPULANTE: Final[str] = 'scan_sala'
+TXT_SCAN_TRIPULANTE: Final[str] = 'scan_tripulante'
 """
 Requiere:
 

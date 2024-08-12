@@ -503,7 +503,7 @@
                 "id": "RDPI8R",
                 "nombre": "Sala de operaciones",
                 "descripcion": "",
-                "aforo": 10,
+                "aforo": 16,
                 "is_puerta_abierta": false,
                 "estado": 100,
                 "permisos": [],

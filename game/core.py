@@ -77,6 +77,7 @@ def say(state: State, user: User, command_text: str):
                 'puntos_vida': user.avatar.vida,
                 'estado': user.avatar.estado,
                 'asignacion_tripulante': user.avatar.asignacion,
+                'localizacion_tripulante': 'Pasillos' if user.avatar.sala is None else user.avatar.sala.nombre,
                 'cuerpo': user.avatar.cuerpo,
                 'rango': user.avatar.rango,
                 'permisos': str.join(', ', user.avatar.permisos),
@@ -222,10 +223,10 @@ async def keyboard_interaction(state: State, user: User, dialog: Dialogo) -> tup
             return ['Control finalizado', None]
         case 'ctl/save':
             state.loader.save_from(state.game)
-            return [f"Control del ARCA\n<i>Guardado {time.time()}</i>", root_control]
+            return [f"Control del ARCA\n<i>Guardado {time.strftime('%H:%M:%S')}</i>", root_control]
         case 'ctl/load':
             state.loader.load_into(state.game)
-            return [f"Control del ARCA\n<i>Cargado {time.time()}</i>", root_control]
+            return [f"Control del ARCA\n<i>Cargado {time.strftime('%H:%M:%S')}</i>", root_control]
         case 'ctl/crew':
             page = dialog.data if dialog.data != None else 0
             options: list[list[InlineKeyboardButton]] = []
@@ -337,14 +338,14 @@ async def keyboard_interaction(state: State, user: User, dialog: Dialogo) -> tup
                 print(colored(f" ⚠️ {user.describe()} scanned crewmember {dialog.data}. Problem is, he doesn't exist",'yellow'))
                 return ["Este tripulante no existe", None]
 
-            print(colored(f" 🤖 SCAN - {user.describe()} scanned {member.name}",'green'))
             return [
                 state.txts.build_text(consts.TXT_SCAN_TRIPULANTE, {
-                    'cuerpo_tripulante': member.name,
+                    'nombre_tripulante': member.name,
+                    'cuerpo_tripulante': member.cuerpo,
                     'asignacion_tripulante': member.asignacion,
                     'prestigio_tripulante': member.prestigio,
                     'estado_tripulante': member.estado,
-                    'extra': f"<i>{time.time()}</i>",
+                    'extra': f"<i>{time.strftime('%H:%M:%S')}</i>",
                 }),
                 None
             ]
@@ -361,11 +362,35 @@ async def keyboard_interaction(state: State, user: User, dialog: Dialogo) -> tup
                     'asignacion_tripulante': member.asignacion,
                     'prestigio_tripulante': member.prestigio,
                     'estado_tripulante': member.estado,
-                    'extra': f"Interacción finalizada <i>{time.time()}</i>",
+                    'extra': f"Interacción finalizada <i>{time.strftime('%H:%M:%S')}</i>",
                 }),
                 None
             ]
-        case 'sal':
+        case 'loc':
+            room = next((r for r in state.game.arca.salas if r.id == dialog.data), None)
+
+            if room is None:
+                print(colored(f" ⚠️ {user.describe()} scanned room {dialog.data}. Problem is, it doesn't exist",'yellow'))
+                return ["Esta sala no existe", None]
+            permisos_usuario = [] if user.avatar is None else user.avatar.permisos
+            permiso_acceso = room.tiene_permiso(permisos_usuario)
+            estado_especial = ''
+
+            return [
+                state.txts.build_text(consts.TXT_SCAN_SALA, {
+                    'nombre_sala': room.nombre,
+                    'ocupantes': room.ocupantes,
+                    'aforo_sala': room.aforo,
+                    'estado': room.estado,
+                    'estado_puerta': 'Abierta' if room.is_puerta_abierta else 'Cerrada',
+                    'tiene_permiso': '🟢' if permiso_acceso else '🛑',
+                    'estado_especial': estado_especial,
+                    'descripcion_sala': room.descripcion,
+                    'extra': f"<i>{time.strftime('%H:%M:%S')}</i>",
+                }),
+                None
+            ]
+        case 'loc/x':
             room = next((r for r in state.game.arca.salas if r.id == dialog.data), None)
 
             if room is None:
@@ -385,40 +410,72 @@ async def keyboard_interaction(state: State, user: User, dialog: Dialogo) -> tup
                     'tiene_permiso': '🟢' if permiso_acceso else '🛇',
                     'estado_especial': estado_especial,
                     'descripcion_sala': room.descripcion,
-                    'extra': f"<i>{time.time()}</i>",
+                    'extra': f"Interacción finalizada <i>{time.strftime('%H:%M:%S')}</i>",
                 }),
                 None
             ]
-        case 'sal/x':
-            room = next((r for r in state.game.arca.salas if r.id == dialog.data), None)
-
-            if room is None:
-                print(colored(f" ⚠️ {user.describe()} scanned room {dialog.data}. Problem is, it doesn't exist",'yellow'))
-                return ["Esta sala no existe", None]
-            permisos_usuario = [] if user.avatar is None else user.avatar.permisos
-            permiso_acceso = room.tiene_permiso(permisos_usuario)
-            estado_especial = ''
-
-            return [
-                state.txts.build_text(consts.TXT_SCAN_SALA, {
-                    'nombre_sala': room.nombre,
-                    'ocupantes': room.ocupantes,
-                    'aforo_sala': room.aforo,
-                    'estado': room.estado,
-                    'estado_puerta': 'Abierta' if room.is_puerta_abierta else 'Cerrada',
-                    'tiene_permiso': '🟢' if permiso_acceso else '🛇',
-                    'estado_especial': estado_especial,
-                    'descripcion_sala': room.descripcion,
-                    'extra': f"Interacción finalizada <i>{time.time()}</i>",
-                }),
-                None
-            ]
-        case 'ret':
+        case 'chl':
             reto = next((r for r in state.game.retos if r.id == dialog.data), None)
             
             if reto is None:
                 print(colored(f" ⚠️ {user.describe()} scanned trial {dialog.data}. Problem is, it doesn't exist",'yellow'))
-                return ["Este tripulante no existe", None]
+                return ["Este reto no existe", None]
+            text_activo = '' if reto.activo else '\nAhora mismo no puedes hacer nada aquí'
+            markup = None
+
+            if reto.activo and user.avatar is not None and reto.es_capaz(user.avatar.atributos):
+                botones = [
+                    [InlineKeyboardButton("Intentar", callback_data=json.dumps(Dialogo("chl/i", dialog.data).to_tuple()))],
+                    [InlineKeyboardButton("Cerrar", callback_data=json.dumps(Dialogo("chl/x", dialog.data).to_tuple()))],
+                ]
+                markup = InlineKeyboardMarkup(botones)
+
+            return [
+                state.txts.build_text(consts.TXT_SCAN_RETO, {
+                    'nombre_reto': reto.nombre,
+                    'text_activo': text_activo,
+                    'descripcion_reto': reto.descripcion,
+                    'extra': f"<i>{time.strftime('%H:%M:%S')}</i>",
+                }),
+                markup
+            ]
+        case 'chl/i':
+            reto = next((r for r in state.game.retos if r.id == dialog.data), None)
+            
+            if reto is None:
+                print(colored(f" ⚠️ {user.describe()} tried trial {dialog.data}. Problem is, it doesn't exist",'yellow'))
+                return ["Este reto no existe", None]
+            text_activo = '' if reto.activo else '\nAhora mismo no puedes hacer nada aquí'
+            markup = None
+            intento_text = 'No se puede interactuar sin estar registrado'
+
+            if user.avatar is not None:
+                exitos = reto.intentar(user.avatar.atributos)
+                print(colored(f" - {user.describe()} tried trial {reto.nombre}. He managed {exitos} successes",'green'))
+                intento_text = f"Has conseguido {exitos} éxitos en la prueba"
+
+            if reto.activo and user.avatar is not None and reto.es_capaz(user.avatar.atributos):
+                botones = [
+                    [InlineKeyboardButton("Intentar", callback_data=json.dumps(Dialogo("chl/i", dialog.data).to_tuple()))],
+                    [InlineKeyboardButton("Cerrar", callback_data=json.dumps(Dialogo("chl/x", dialog.data).to_tuple()))],
+                ]
+                markup = InlineKeyboardMarkup(botones)
+
+            return [
+                state.txts.build_text(consts.TXT_SCAN_RETO, {
+                    'nombre_reto': reto.nombre,
+                    'text_activo': text_activo,
+                    'descripcion_reto': reto.descripcion,
+                    'extra': f"{intento_text} <i>{time.strftime('%H:%M:%S')}</i>",
+                }),
+                markup
+            ]
+        case 'chl/x':
+            reto = next((r for r in state.game.retos if r.id == dialog.data), None)
+            
+            if reto is None:
+                print(colored(f" ⚠️ {user.describe()} closed trial {dialog.data}. Problem is, it doesn't exist",'yellow'))
+                return ["Este reto no existe", None]
             text_activo = '' if reto.activo else 'Ahora mismo no puedes hacer nada aquí'
 
             return [
@@ -426,24 +483,7 @@ async def keyboard_interaction(state: State, user: User, dialog: Dialogo) -> tup
                     'nombre_reto': reto.nombre,
                     'text_activo': text_activo,
                     'descripcion_reto': reto.descripcion,
-                    'extra': f"<i>{time.time()}</i>",
-                }),
-                None
-            ]
-        case 'ret/x':
-            reto = next((r for r in state.game.retos if r.id == dialog.data), None)
-            
-            if reto is None:
-                print(colored(f" ⚠️ {user.describe()} scanned trial {dialog.data}. Problem is, it doesn't exist",'yellow'))
-                return ["Este tripulante no existe", None]
-            text_activo = '' if reto.activo else 'Ahora mismo no puedes hacer nada aquí'
-
-            return [
-                state.txts.build_text(consts.TXT_SCAN_RETO, {
-                    'nombre_reto': reto.nombre,
-                    'text_activo': text_activo,
-                    'descripcion_reto': reto.descripcion,
-                    'extra': f"Interacción finalizada <i>{time.time()}</i>",
+                    'extra': f"Interacción finalizada <i>{time.strftime('%H:%M:%S')}</i>",
                 }),
                 None
             ]

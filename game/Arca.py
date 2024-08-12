@@ -79,7 +79,7 @@ class Sala:
         self.aforo = aforo
 
     def tiene_permiso(self, permisos: list[str]):
-        if permisos[0] == 'admin':
+        if 'admin' in permisos:
             return True
         for requisito in self.permisos:
             if requisito not in permisos:
