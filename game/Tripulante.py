@@ -96,4 +96,6 @@ def dime_estado(vida: int, is_sano: bool, is_contagiado: bool, is_criogenizado: 
         return '☣️ INFECTADO'
     if not is_sano:
         return '😓 DÉBIL'
+    if vida < 3:
+        return '🤕 HERIDO'
     return '💚 SANO'
