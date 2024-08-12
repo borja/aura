@@ -8,6 +8,7 @@ Requiere:
 'nombre': '',\\
 'puntos_vida': '',\\
 'estado': '',\\
+'asignacion_tripulante': '',\\
 'cuerpo': '',\\
 'rango': '',\\
 'permisos': '',\\
@@ -35,7 +36,40 @@ Requiere:
 
 'nombre_tripulante': '',
 """
-TXT_SCAN_: Final[str] = 'scan'
+TXT_SCAN_SALA: Final[str] = 'scan_sala'
+"""
+Requiere:
+
+'nombre_sala': '',\\
+'ocupantes': '',\\
+'aforo_sala': '',\\
+'estado': '',\\
+'estado_puerta': '',\\
+'tiene_permiso': '🛇🟢',\\
+'estado_especial': '',\\
+'descripcion_sala': '',\\
+'extra': '',
+"""
+TXT_SCAN_TRIPULANTE: Final[str] = 'scan_sala'
+"""
+Requiere:
+
+'nombre_tripulante': '',\\
+'cuerpo_tripulante': '',\\
+'asignacion_tripulante': '',\\
+'prestigio_tripulante': '',\\
+'estado_tripulante': '',\\
+'extra': '',
+"""
+TXT_SCAN_RETO: Final[str] = 'scan_reto'
+"""
+Requiere:
+
+'nombre_reto': '',\\
+'text_activo': '',\\
+'descripcion_reto': '',\\
+'extra': '',
+"""
 TXT_TRIPULANTES: Final[str] = 'tripulantes'
 TXT_WELCOME: Final[str] = 'welcome'
 TXT_BROADCAST: Final[str] = 'broadcast'

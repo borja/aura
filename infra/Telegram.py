@@ -112,7 +112,8 @@ async def handle_text_command(state: State, user: User, update: Update, context:
         case 'dime' | 'di' | 'imprime' | 'informa' | 'muestra' | 'i' | 'y':
             await update.message.reply_text(say(state,user,rest), parse_mode=ParseMode.HTML)
         case 'scan':
-            await update.message.reply_text(scan(state,user,rest), parse_mode=ParseMode.HTML)
+            respuesta = await scan(state,user,rest)
+            await update.message.reply_text(respuesta[0], reply_markup=respuesta[1], parse_mode=ParseMode.HTML)
         case 'hola' | 'saludos' | 'saludo' | 'buenas' | 'w':
             await update.message.reply_text(state.txts.build_text(consts.TXT_SALUDO, {
                 'nombre_tripulante': 'invitado' if user.avatar == None else user.avatar.name,

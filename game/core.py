@@ -8,7 +8,8 @@ import math
 import re
 
 from termcolor import colored
-from game.Dialogo import Dialogo, DIALOGOS_CONTROL, DIALOGOS_MENSAJE, root_control
+from game.Dialogo import DIALOGOS_SCAN_RETO, DIALOGOS_SCAN_SALA, DIALOGOS_SCAN_TRIPULANTE, Dialogo, DIALOGOS_CONTROL, DIALOGOS_MENSAJE, root_control
+from game.Tripulante import Tripulante
 from game.User import User
 from infra.State import State
 import consts
@@ -75,6 +76,7 @@ def say(state: State, user: User, command_text: str):
                 'nombre': user.avatar.name,
                 'puntos_vida': user.avatar.vida,
                 'estado': user.avatar.estado,
+                'asignacion_tripulante': user.avatar.asignacion,
                 'cuerpo': user.avatar.cuerpo,
                 'rango': user.avatar.rango,
                 'permisos': str.join(', ', user.avatar.permisos),
@@ -123,56 +125,24 @@ def say(state: State, user: User, command_text: str):
             print(colored(f" ⚠️ - Invalid information request: {command}",'yellow'))
             return f"No existe información registrada para la propiedad: {command}"
 
-def describe_crew(state: State, user: User, tripulante):
-    member = next((mem for mem in state.game.crew if mem.id == tripulante), None)
-
-    if member is None:
-        print(colored(f" ⚠️ El tripulante: {tripulante} no existe",'yellow'))
-        return "Este tripulante no existe"
-    else:
-        print(colored(f" 🤖 SCAN - Resultado del tripulante: {member.name}",'green'))
-        return f"""
-*INFORME DE TRIPULANTE*
-
-    *Nombre*: {member.name}
-    *Cuerpo*: {member.cuerpo}
-    *Asignación*: {member.rango}
-    *Prestigio* {member.prestigio}
-    *Salud*: {member.estado}
-    """
-
-def describe_room(state: State, user: User, sala):
-    room = next((r for r in state.game.arca.salas if r.id == sala), None)
-
-    if room is None:
-        print(colored(f" ⚠️ La sala: {room} no existe",'yellow'))
-        return "⚠️ La sala introducida no existe"
-    else:
-        print(colored(f" 🤖 SCAN - Resultado de la sala: {room.nombre}",'green'))
-        return f"""
-**{room.nombre}**
-Descripción: {room.descripcion}
-Aforo: {room.aforo} tripulantes
-"""
-
-def scan(state: State, user: User, command_text: str):
+async def scan(state: State, user: User, command_text: str) -> tuple[str, Optional[InlineKeyboardMarkup]]:
     re_match = re.search("^[^ ]+", command_text.lower())
     command = re_match[0]
     args = command_text[re_match.end(0)+1:].split(' ')
 
     match command:
         case 'crew' | 'tripulante':
-            print(colored(f" 🔎 SCAN CODE command: {command} received, with args: ",'blue'))
-            return describe_crew(state, user, args[0])
+            print(colored(f" 🔎 {user.describe()} SCANned crew command: {command} received, with arg: {args[0]}",'blue'))
+            return await keyboard_interaction(state, user, Dialogo(DIALOGOS_SCAN_TRIPULANTE, args[0]))
         case 'room' | 'sala':
-            print(colored(f" ⚠️ WARNING: SCAN feature for command: {command}, {args} is being implemented",'yellow'))
-            return describe_room(state, user, args[0])
+            print(colored(f" 🔎 {user.describe()} SCANned room command: {command} received, with arg: {args[0]}",'blue'))
+            return await keyboard_interaction(state, user, Dialogo(DIALOGOS_SCAN_SALA, args[0]))
         case 'test' | 'analiza':
-            print(colored(f" ⚠️ WARNING: SCAN feature for command: {command}, {args} is not implemented",'yellow'))
-            return " ⚠️ WARNING: Esta feature no ha sido implementada"
+            print(colored(f" 🔎 {user.describe()} SCANned trial command: {command} received, with arg: {args[0]}",'blue'))
+            return await keyboard_interaction(state, user, Dialogo(DIALOGOS_SCAN_RETO, args[0]))
         case _:
-            print(colored(f" ⚠️ - Invalid scan request: {command}",'yellow'))
-            return f"🚫 No es viable realizar un análisis de tipo: {command}"
+            print(colored(f" ⚠️ - {user.describe()} SCANned unexpected element: {command}",'yellow'))
+            return [f"🚫 No es viable realizar un análisis de tipo: {command}", None]
 
 def register(state: State, user: User, command_text: str):
     re_match = re.search("^[^ ]+", command_text.lower())
@@ -224,7 +194,8 @@ async def enviar_mensaje(state: State, user: User, command_text: str) -> tuple[s
         user.outgoing_msg = mensaje
         return await keyboard_interaction(state, user, Dialogo(DIALOGOS_MENSAJE, 0))
 
-    target_user = next((g_user for g_user in state.game.users if g_user.avatar != None and g_user.avatar.id == avatar_id), None)
+    avatar_id = avatar_id.lower()
+    target_user = next((g_user for g_user in state.game.users if g_user.avatar != None and g_user.avatar.id.lower() == avatar_id), None)
     if target_user == None:
         return ["No se ha podido encontrar el tripulante", None]
     if target_user.chatId == -1:
@@ -359,6 +330,123 @@ async def keyboard_interaction(state: State, user: User, dialog: Dialogo) -> tup
             return [f"El mensaje se ha enviado a {target_user.avatar.name}", None]
         case 'msg/x':
             return ['Se ha cancelado el mensaje', None]
+        case 'mem':
+            member = next((mem for mem in state.game.crew if mem.id == dialog.data), None)
+
+            if member is None:
+                print(colored(f" ⚠️ {user.describe()} scanned crewmember {dialog.data}. Problem is, he doesn't exist",'yellow'))
+                return ["Este tripulante no existe", None]
+
+            print(colored(f" 🤖 SCAN - {user.describe()} scanned {member.name}",'green'))
+            return [
+                state.txts.build_text(consts.TXT_SCAN_TRIPULANTE, {
+                    'cuerpo_tripulante': member.name,
+                    'asignacion_tripulante': member.asignacion,
+                    'prestigio_tripulante': member.prestigio,
+                    'estado_tripulante': member.estado,
+                    'extra': f"<i>{time.time()}</i>",
+                }),
+                None
+            ]
+        case 'mem/x':
+            member = next((mem for mem in state.game.crew if mem.id == dialog.data), None)
+
+            if member is None:
+                print(colored(f" ⚠️ {user.describe()} scanned crewmember {dialog.data}. Problem is, he doesn't exist",'yellow'))
+                return ["Este tripulante no existe", None]
+
+            return [
+                state.txts.build_text(consts.TXT_SCAN_TRIPULANTE, {
+                    'cuerpo_tripulante': member.name,
+                    'asignacion_tripulante': member.asignacion,
+                    'prestigio_tripulante': member.prestigio,
+                    'estado_tripulante': member.estado,
+                    'extra': f"Interacción finalizada <i>{time.time()}</i>",
+                }),
+                None
+            ]
+        case 'sal':
+            room = next((r for r in state.game.arca.salas if r.id == dialog.data), None)
+
+            if room is None:
+                print(colored(f" ⚠️ {user.describe()} scanned room {dialog.data}. Problem is, it doesn't exist",'yellow'))
+                return ["Esta sala no existe", None]
+            permisos_usuario = [] if user.avatar is None else user.avatar.permisos
+            permiso_acceso = room.tiene_permiso(permisos_usuario)
+            estado_especial = ''
+
+            return [
+                state.txts.build_text(consts.TXT_SCAN_SALA, {
+                    'nombre_sala': room.nombre,
+                    'ocupantes': room.ocupantes,
+                    'aforo_sala': room.aforo,
+                    'estado': room.estado,
+                    'estado_puerta': 'Abierta' if room.is_puerta_abierta else 'Cerrada',
+                    'tiene_permiso': '🟢' if permiso_acceso else '🛇',
+                    'estado_especial': estado_especial,
+                    'descripcion_sala': room.descripcion,
+                    'extra': f"<i>{time.time()}</i>",
+                }),
+                None
+            ]
+        case 'sal/x':
+            room = next((r for r in state.game.arca.salas if r.id == dialog.data), None)
+
+            if room is None:
+                print(colored(f" ⚠️ {user.describe()} scanned room {dialog.data}. Problem is, it doesn't exist",'yellow'))
+                return ["Esta sala no existe", None]
+            permisos_usuario = [] if user.avatar is None else user.avatar.permisos
+            permiso_acceso = room.tiene_permiso(permisos_usuario)
+            estado_especial = ''
+
+            return [
+                state.txts.build_text(consts.TXT_SCAN_SALA, {
+                    'nombre_sala': room.nombre,
+                    'ocupantes': room.ocupantes,
+                    'aforo_sala': room.aforo,
+                    'estado': room.estado,
+                    'estado_puerta': 'Abierta' if room.is_puerta_abierta else 'Cerrada',
+                    'tiene_permiso': '🟢' if permiso_acceso else '🛇',
+                    'estado_especial': estado_especial,
+                    'descripcion_sala': room.descripcion,
+                    'extra': f"Interacción finalizada <i>{time.time()}</i>",
+                }),
+                None
+            ]
+        case 'ret':
+            reto = next((r for r in state.game.retos if r.id == dialog.data), None)
+            
+            if reto is None:
+                print(colored(f" ⚠️ {user.describe()} scanned trial {dialog.data}. Problem is, it doesn't exist",'yellow'))
+                return ["Este tripulante no existe", None]
+            text_activo = '' if reto.activo else 'Ahora mismo no puedes hacer nada aquí'
+
+            return [
+                state.txts.build_text(consts.TXT_SCAN_RETO, {
+                    'nombre_reto': reto.nombre,
+                    'text_activo': text_activo,
+                    'descripcion_reto': reto.descripcion,
+                    'extra': f"<i>{time.time()}</i>",
+                }),
+                None
+            ]
+        case 'ret/x':
+            reto = next((r for r in state.game.retos if r.id == dialog.data), None)
+            
+            if reto is None:
+                print(colored(f" ⚠️ {user.describe()} scanned trial {dialog.data}. Problem is, it doesn't exist",'yellow'))
+                return ["Este tripulante no existe", None]
+            text_activo = '' if reto.activo else 'Ahora mismo no puedes hacer nada aquí'
+
+            return [
+                state.txts.build_text(consts.TXT_SCAN_RETO, {
+                    'nombre_reto': reto.nombre,
+                    'text_activo': text_activo,
+                    'descripcion_reto': reto.descripcion,
+                    'extra': f"Interacción finalizada <i>{time.time()}</i>",
+                }),
+                None
+            ]
         case _:
             return ['Unexpected path', None]
 

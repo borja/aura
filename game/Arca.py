@@ -67,6 +67,7 @@ class Sala:
     nombre: str = ''
     descripcion: str = ''
     aforo: int = 1
+    ocupantes: int = 0
     is_puerta_abierta: bool = False
     estado: int = 100
     permisos: list[str] = []

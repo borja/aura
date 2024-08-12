@@ -41,6 +41,7 @@ class Tripulante:
     vida: int = 3
     prestigio: int = 0
     estado: str = ''
+    asignacion: str = 'Ninguna'
     is_sano: bool = True
     is_contagiado: bool = False
     is_criogenizado: bool = False
@@ -55,6 +56,7 @@ class Tripulante:
         tripulante.name = fuente.get('name', 'ERR500')
         tripulante.cuerpo = fuente.get('cuerpo', 'ERR500')
         tripulante.rango = fuente.get('rango', 'ERR500')
+        tripulante.asignacion = fuente.get('asignacion', 'Ninguna')
         tripulante.permisos = fuente.get('permisos', ['miembro'])
         tripulante.vida = fuente.get('vida', 3)
         tripulante.is_sano = fuente.get('is_sano', True)
@@ -67,6 +69,7 @@ class Tripulante:
         sala_id = fuente.get('sala', '')
         if sala_id != '':
             tripulante.sala = next((sala for sala in salas if sala.id == sala_id), None)
+            tripulante.sala.ocupantes += 1
 
         return tripulante
     
@@ -77,6 +80,7 @@ class Tripulante:
             'name': self.name,
             'cuerpo': self.cuerpo,
             'rango': self.rango,
+            'asignacion': self.asignacion,
             'permisos': self.permisos,
             'vida': self.vida,
             'prestigio': self.prestigio,
