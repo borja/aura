@@ -17,13 +17,6 @@ class Dialogo:
         self.ruta = ruta
         self.data = data
 
-    def clone(self, ruta: str, data: any = None):
-        cloned = Dialogo(
-            ruta,
-            data,
-        )
-        return cloned
-
     @staticmethod
     def from_tuple(fuente: tuple[str, str, any]):
         dia = Dialogo(fuente[0], fuente[1])
@@ -34,19 +27,6 @@ class Dialogo:
             self.ruta,
             self.data,
         ]
-
-root_control = InlineKeyboardMarkup([
-    [
-        InlineKeyboardButton("Tripulantes", callback_data=json.dumps(Dialogo(f"{DIALOGOS_CONTROL}/crew").to_tuple())),
-        InlineKeyboardButton("Arca", callback_data=json.dumps(Dialogo(f"{DIALOGOS_CONTROL}/arca").to_tuple()))
-    ],
-    [
-        InlineKeyboardButton("Retos", callback_data=json.dumps(Dialogo(f"{DIALOGOS_CONTROL}/chl").to_tuple())),
-        InlineKeyboardButton("Salas", callback_data=json.dumps(Dialogo(f"{DIALOGOS_CONTROL}/loc").to_tuple()))
-    ],
-    [
-        InlineKeyboardButton('Guardar', callback_data=json.dumps(Dialogo(f"{DIALOGOS_CONTROL}/save").to_tuple())),
-        InlineKeyboardButton('Cargar', callback_data=json.dumps(Dialogo(f"{DIALOGOS_CONTROL}/load").to_tuple())),
-        InlineKeyboardButton('Cerrar', callback_data=json.dumps(Dialogo(f"{str(DIALOGOS_CONTROL)}/x").to_tuple())),
-    ],
-])
+    
+    def serialize(self):
+        return json.dumps(self.to_tuple())
