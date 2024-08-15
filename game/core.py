@@ -217,47 +217,65 @@ def controlar(state: State, user: User) -> tuple[str, Optional[InlineKeyboardMar
 async def keyboard_interaction(state: State, user: User, dialog: Dialogo) -> tuple[str, Optional[InlineKeyboardMarkup]]:
     match dialog.ruta:
         case 'ctl':
-            return teclados.ctl(state, user, dialog)
+            return await teclados.ctl(state, user, dialog)
         case 'ctl/x':
-            return teclados.ctl_x(state, user, dialog)
+            return await teclados.ctl_x(state, user, dialog)
         case 'ctl/save':
-            return teclados.ctl_save(state, user, dialog)
+            return await teclados.ctl_save(state, user, dialog)
         case 'ctl/load':
-            return teclados.ctl_load(state, user, dialog)
+            return await teclados.ctl_load(state, user, dialog)
         case 'ctl/crew':
-            return teclados.ctl_crew(state, user, dialog)
+            return await teclados.ctl_crew(state, user, dialog)
         case 'ctl/crew/i':
-            return teclados.ctl_crew_i(state, user, dialog)
+            return await teclados.ctl_crew_i(state, user, dialog)
         case 'ctl/arca':
-            return teclados.ctl_arca(state, user, dialog)
+            return await teclados.ctl_arca(state, user, dialog)
         case 'ctl/chl':
-            return teclados.ctl_chl(state, user, dialog)
+            return await teclados.ctl_chl(state, user, dialog)
         case 'ctl/chl/i':
-            return teclados.ctl_chl_i(state, user, dialog)
+            return await teclados.ctl_chl_i(state, user, dialog)
         case 'ctl/loc':
-            return teclados.ctl_loc(state, user, dialog)
+            return await teclados.ctl_loc(state, user, dialog)
         case 'ctl/loc/i':
-            return teclados.ctl_loc_i(state, user, dialog)
+            return await teclados.ctl_loc_i(state, user, dialog)
         case 'msg':
-            return teclados.msg(state, user, dialog)
+            return await teclados.msg(state, user, dialog)
         case 'msg/i':
-            return teclados.msg_i(state, user, dialog)
+            return await teclados.msg_i(state, user, dialog)
         case 'msg/x':
-            return teclados.msg_x(state, user, dialog)
+            return await teclados.msg_x(state, user, dialog)
         case 'mem':
-            return teclados.mem(state, user, dialog)
+            return await teclados.mem(state, user, dialog)
         case 'mem/x':
-            return teclados.mem_x(state, user, dialog)
+            return await teclados.mem_x(state, user, dialog)
         case 'loc':
-            return teclados.loc(state, user, dialog)
+            return await teclados.loc(state, user, dialog)
+        case 'loc/e':
+            return await teclados.loc_e(state, user, dialog)
+        case 'loc/i':
+            return await teclados.loc_i(state, user, dialog)
+        case 'loc/c':
+            return await teclados.loc_c(state, user, dialog)
+        case 'loc/o':
+            return await teclados.loc_o(state, user, dialog)
+        case 'loc/bc':
+            return await teclados.loc_bc(state, user, dialog)
+        case 'loc/bo':
+            return await teclados.loc_bo(state, user, dialog)
+        case 'loc/fn':
+            return await teclados.loc_fn(state, user, dialog)
+        case 'loc/fi':
+            return await teclados.loc_fi(state, user, dialog)
+        case 'loc/fo':
+            return await teclados.loc_fo(state, user, dialog)
         case 'loc/x':
-            return teclados.loc_x(state, user, dialog)
+            return await teclados.loc_x(state, user, dialog)
         case 'chl':
-            return teclados.chl(state, user, dialog)
+            return await teclados.chl(state, user, dialog)
         case 'chl/i':
-            return teclados.chl_i(state, user, dialog)
+            return await teclados.chl_i(state, user, dialog)
         case 'chl/x':
-            return teclados.chl_x(state, user, dialog)
+            return await teclados.chl_x(state, user, dialog)
         case _:
             return ['Unexpected path', None]
 

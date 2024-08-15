@@ -1,6 +1,3 @@
-
-from enum import Enum
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 import json
 
 DIALOGOS_CONTROL ='ctl'
@@ -22,11 +19,15 @@ class Dialogo:
         dia = Dialogo(fuente[0], fuente[1])
         return dia
 
+    @staticmethod
+    def deserialize(source: str):
+        return Dialogo.from_tuple( json.loads(source))
+
     def to_tuple(self):
         return [
             self.ruta,
             self.data,
         ]
-    
+
     def serialize(self):
         return json.dumps(self.to_tuple())

@@ -1,18 +1,16 @@
-from typing import Optional
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.constants import ParseMode
 import time
 import json
-import html
 import math
-import re
+import consts
 
 from termcolor import colored
+from game.Arca import Sala, tiene_permisos
 from game.Dialogo import Dialogo
-from game.Tripulante import Tripulante
+from game.Reto import Reto
 from game.User import User
 from infra.State import State
-import consts
 
 
 PAGE_ITEMS = 10
@@ -198,89 +196,222 @@ async def mem_x(state: State, user: User, dialog: Dialogo):
     ]
 
 async def loc(state: State, user: User, dialog: Dialogo):
+    """
+        Controles sala
+    """
     room = next((r for r in state.game.arca.salas if r.id == dialog.data), None)
 
     if room is None:
         print(colored(f" ⚠️ {user.describe()} scanned room {dialog.data}. Problem is, it doesn't exist",'yellow'))
-        return ["Esta sala no existe", None]
-    permisos_usuario = [] if user.avatar is None else user.avatar.permisos
-    permiso_acceso = room.tiene_permiso(permisos_usuario)
-    estado_especial = ''
+        return ['Esta sala no existe', None]
 
-    return [
-        state.txts.build_text(consts.TXT_SCAN_SALA, {
-            'nombre_sala': room.nombre,
-            'ocupantes': room.ocupantes,
-            'aforo_sala': room.aforo,
-            'estado': room.estado,
-            'estado_puerta': 'Abierta' if room.is_puerta_abierta else 'Cerrada',
-            'tiene_permiso': '🟢' if permiso_acceso else '🛑',
-            'estado_especial': estado_especial,
-            'descripcion_sala': room.descripcion,
-            'extra': f"<i>{time.strftime('%H:%M:%S')}</i>",
-        }),
-        None
-    ]
+    return _loc(state, user, room, '', True)
 
 async def loc_x(state: State, user: User, dialog: Dialogo):
+    """
+        Cerrar sala
+    """
     room = next((r for r in state.game.arca.salas if r.id == dialog.data), None)
 
     if room is None:
         print(colored(f" ⚠️ {user.describe()} scanned room {dialog.data}. Problem is, it doesn't exist",'yellow'))
         return ["Esta sala no existe", None]
-    permisos_usuario = [] if user.avatar is None else user.avatar.permisos
-    permiso_acceso = room.tiene_permiso(permisos_usuario)
-    estado_especial = ''
 
-    return [
-        state.txts.build_text(consts.TXT_SCAN_SALA, {
-            'nombre_sala': room.nombre,
-            'ocupantes': room.ocupantes,
-            'aforo_sala': room.aforo,
-            'estado': room.estado,
-            'estado_puerta': 'Abierta' if room.is_puerta_abierta else 'Cerrada',
-            'tiene_permiso': '🟢' if permiso_acceso else '🛇',
-            'estado_especial': estado_especial,
-            'descripcion_sala': room.descripcion,
-            'extra': f"Interacción finalizada <i>{time.strftime('%H:%M:%S')}</i>",
-        }),
-        None
-    ]
+    return _loc(state, user, room, 'Interacción cerrada. ', False)
+
+async def loc_e(state: State, user: User, dialog: Dialogo):
+    """
+        Salir de la sala "Exit"
+    """
+    room = next((r for r in state.game.arca.salas if r.id == dialog.data), None)
+
+    if room is None:
+        print(
+            colored(
+                f" ⚠️ {user.describe()} scanned room {dialog.data}. Problem is, it doesn't exist",
+                "yellow",
+            )
+        )
+        return ["Esta sala no existe", None]
+
+    if user.avatar is not None:
+        user.avatar.sala.ocupantes -= 1
+        user.avatar.sala = None
+
+    return _loc(state, user, room, 'Se ha salido de sala. ', False)
+
+async def loc_i(state: State, user: User, dialog: Dialogo):
+    """
+        Entrar en la sala "get Inside"
+    """
+    room = next((r for r in state.game.arca.salas if r.id == dialog.data), None)
+
+    if room is None:
+        print(
+            colored(
+                f" ⚠️ {user.describe()} scanned room {dialog.data}. Problem is, it doesn't exist",
+                "yellow",
+            )
+        )
+        return ["Esta sala no existe", None]
+
+    if user.avatar is not None:
+        if user.avatar.sala is not None:
+            user.avatar.sala.ocupantes -= 1
+        user.avatar.sala = room
+        user.avatar.sala.ocupantes += 1
+
+    return _loc(state, user, room, 'Accedido a la sala. ', True)
+
+async def loc_c(state: State, user: User, dialog: Dialogo):
+    """
+        Cerrar puerta "Close"
+    """
+    room = next((r for r in state.game.arca.salas if r.id == dialog.data), None)
+
+    if room is None:
+        print(
+            colored(
+                f" ⚠️ {user.describe()} scanned room {dialog.data}. Problem is, it doesn't exist",
+                "yellow",
+            )
+        )
+        return ["Esta sala no existe", None]
+
+    room.is_puerta_abierta = False
+
+    return _loc(state, user, room, 'Puerta cerrada. ', True)
+
+async def loc_o(state: State, user: User, dialog: Dialogo):
+    """
+        Abrir puerta "Open"
+    """
+    room = next((r for r in state.game.arca.salas if r.id == dialog.data), None)
+
+    if room is None:
+        print(
+            colored(
+                f" ⚠️ {user.describe()} scanned room {dialog.data}. Problem is, it doesn't exist",
+                "yellow",
+            )
+        )
+        return ["Esta sala no existe", None]
+
+    room.is_puerta_abierta = True
+
+    return _loc(state, user, room, 'Puerta abierta. ', True)
+
+async def loc_bo(state: State, user: User, dialog: Dialogo):
+    """
+        Abrir sello "Block Open"
+    """
+    room = next((r for r in state.game.arca.salas if r.id == dialog.data), None)
+
+    if room is None:
+        print(
+            colored(
+                f" ⚠️ {user.describe()} scanned room {dialog.data}. Problem is, it doesn't exist",
+                "yellow",
+            )
+        )
+        return ["Esta sala no existe", None]
+
+    if 'sellable' in room.atributos:
+        room.datos["sellado"] = False
+
+    return _loc(state, user, room, 'Sello deshabilitado. ', True)
+
+async def loc_bc(state: State, user: User, dialog: Dialogo):
+    """
+        Cerrar sello "Block Close"
+    """
+    room = next((r for r in state.game.arca.salas if r.id == dialog.data), None)
+
+    if room is None:
+        print(
+            colored(
+                f" ⚠️ {user.describe()} scanned room {dialog.data}. Problem is, it doesn't exist",
+                "yellow",
+            )
+        )
+        return ["Esta sala no existe", None]
+
+    if "sellable" in room.atributos:
+        room.is_puerta_abierta = False
+        room.datos["sellado"] = True
+
+    return _loc(state, user, room, 'Puerta sellada. ', True)
+
+async def loc_fn(state: State, user: User, dialog: Dialogo):
+    """
+        Poner la esclusa en neutral "Floodgate Null"
+    """
+    room = next((r for r in state.game.arca.salas if r.id == dialog.data), None)
+
+    if room is None:
+        print(
+            colored(
+                f" ⚠️ {user.describe()} scanned room {dialog.data}. Problem is, it doesn't exist",
+                "yellow",
+            )
+        )
+        return ["Esta sala no existe", None]
+
+    if "esclusa" in room.atributos:
+        room.is_puerta_abierta = False
+        room.datos["modo_esclusa"] = 'NULL'
+
+    return _loc(state, user, room, 'Esclusa ahora en NULL. ', True)
+
+async def loc_fi(state: State, user: User, dialog: Dialogo):
+    room = next((r for r in state.game.arca.salas if r.id == dialog.data), None)
+
+    if room is None:
+        print(
+            colored(
+                f" ⚠️ {user.describe()} scanned room {dialog.data}. Problem is, it doesn't exist",
+                "yellow",
+            )
+        )
+        return ["Esta sala no existe", None]
+
+    if "esclusa" in room.atributos:
+        room.datos["modo_esclusa"] = 'INPUT'
+
+    return _loc(state, user, room, 'Esclusa ahora en INPUT. ', True)
+
+async def loc_fo(state: State, user: User, dialog: Dialogo):
+    room = next((r for r in state.game.arca.salas if r.id == dialog.data), None)
+
+    if room is None:
+        print(
+            colored(
+                f" ⚠️ {user.describe()} scanned room {dialog.data}. Problem is, it doesn't exist",
+                "yellow",
+            )
+        )
+        return ["Esta sala no existe", None]
+
+    if "esclusa" in room.atributos:
+        room.datos["modo_esclusa"] = "OUTPUT"
+
+    return _loc(state, user, room, 'Esclusa ahora en OUTPUT. ', True)
 
 async def chl(state: State, user: User, dialog: Dialogo):
     reto = next((r for r in state.game.retos if r.id == dialog.data), None)
-    
+
     if reto is None:
         print(colored(f" ⚠️ {user.describe()} scanned trial {dialog.data}. Problem is, it doesn't exist",'yellow'))
         return ["Este reto no existe", None]
-    text_activo = '' if reto.activo else '\nAhora mismo no puedes hacer nada aquí'
-    markup = None
 
-    if reto.activo and user.avatar is not None and reto.es_capaz(user.avatar.atributos):
-        botones = [
-            [InlineKeyboardButton("Intentar", callback_data=json.dumps(Dialogo("chl/i", dialog.data).to_tuple()))],
-            [InlineKeyboardButton("Cerrar", callback_data=json.dumps(Dialogo("chl/x", dialog.data).to_tuple()))],
-        ]
-        markup = InlineKeyboardMarkup(botones)
-
-    return [
-        state.txts.build_text(consts.TXT_SCAN_RETO, {
-            'nombre_reto': reto.nombre,
-            'text_activo': text_activo,
-            'descripcion_reto': reto.descripcion,
-            'extra': f"<i>{time.strftime('%H:%M:%S')}</i>",
-        }),
-        markup
-    ]
+    return _chl(state, user, reto, '', True)
 
 async def chl_i(state: State, user: User, dialog: Dialogo):
     reto = next((r for r in state.game.retos if r.id == dialog.data), None)
-    
+
     if reto is None:
         print(colored(f" ⚠️ {user.describe()} tried trial {dialog.data}. Problem is, it doesn't exist",'yellow'))
         return ["Este reto no existe", None]
-    text_activo = '' if reto.activo else '\nAhora mismo no puedes hacer nada aquí'
-    markup = None
     intento_text = 'No se puede interactuar sin estar registrado'
 
     if user.avatar is not None:
@@ -288,22 +419,7 @@ async def chl_i(state: State, user: User, dialog: Dialogo):
         print(colored(f" - {user.describe()} tried trial {reto.nombre}. He managed {exitos} successes",'green'))
         intento_text = f"Has conseguido {exitos} éxitos en la prueba"
 
-    if reto.activo and user.avatar is not None and reto.es_capaz(user.avatar.atributos):
-        botones = [
-            [InlineKeyboardButton("Intentar", callback_data=json.dumps(Dialogo("chl/i", dialog.data).to_tuple()))],
-            [InlineKeyboardButton("Cerrar", callback_data=json.dumps(Dialogo("chl/x", dialog.data).to_tuple()))],
-        ]
-        markup = InlineKeyboardMarkup(botones)
-
-    return [
-        state.txts.build_text(consts.TXT_SCAN_RETO, {
-            'nombre_reto': reto.nombre,
-            'text_activo': text_activo,
-            'descripcion_reto': reto.descripcion,
-            'extra': f"{intento_text} <i>{time.strftime('%H:%M:%S')}</i>",
-        }),
-        markup
-    ]
+    return _chl(state, user, reto, intento_text, True)
 
 async def ctl_x(state: State, user: User, dialog: Dialogo):
     reto = next((r for r in state.game.retos if r.id == dialog.data), None)
@@ -311,14 +427,188 @@ async def ctl_x(state: State, user: User, dialog: Dialogo):
     if reto is None:
         print(colored(f" ⚠️ {user.describe()} closed trial {dialog.data}. Problem is, it doesn't exist",'yellow'))
         return ["Este reto no existe", None]
-    text_activo = '' if reto.activo else 'Ahora mismo no puedes hacer nada aquí'
+
+    return _chl(state, user, reto, 'Interacción cerrada', False)
+
+def _loc(state: State, user: User, sala: Sala, extra: str, haz_botones: bool):
+    permisos_usuario = [] if user.avatar is None else user.avatar.permisos
+    tiene_permiso_acceso = sala.tiene_permiso(permisos_usuario)
+    esta_encerrado = _esta_usuario_encerrado(user)
+    estado_especial = ""
+    inner_extra = ''
+
+    if esta_encerrado:
+        inner_extra = f"Estás encerrado en {user.avatar.sala.nombre}. "
+
+    botones: list[list[InlineKeyboardButton]] | None = None
+    if haz_botones:
+        botones = []
+        special_closure_enablement = True
+        special_closure_lock = False
+        if 'sellable' in sala.atributos:
+            estado_especial += '\nSala sellada' if sala.datos['sellado'] else ''
+            if sala.datos['sellado'] is True:
+                special_closure_lock = True
+                special_closure_enablement = False
+            if tiene_permisos(sala.datos["permisos_sellado"], permisos_usuario):
+                special_closure_enablement = True
+                if sala.datos['sellado'] is True:
+                    botones.append(
+                        [
+                            InlineKeyboardButton(
+                                "Liberar sello",
+                                callback_data=Dialogo("loc/bo", sala.id).serialize(),
+                            )
+                        ]
+                    )
+                else:
+                    botones.append(
+                        [
+                            InlineKeyboardButton(
+                                "Sellar",
+                                callback_data=Dialogo("loc/bc", sala.id).serialize(),
+                            )
+                        ]
+                    )
+        if 'esclusa' in sala.atributos:
+            estado_especial += f"\nEstado esclusa: {sala.datos['modo_esclusa']}"
+            if sala.datos['modo_esclusa'] != 'INPUT':
+                special_closure_lock = True
+                special_closure_enablement = False
+            if tiene_permisos(sala.datos["permisos_esclusa"], permisos_usuario):
+                if sala.datos['modo_esclusa'] == 'INPUT':
+                    botones.append(
+                        [
+                            InlineKeyboardButton(
+                                "Esclusa -> NULL",
+                                callback_data=Dialogo("loc/fn", sala.id).serialize(),
+                            )
+                        ]
+                    )
+                elif sala.datos['modo_esclusa'] == 'NULL':
+                    botones.append(
+                        [
+                            InlineKeyboardButton(
+                                "Esclusa -> INPUT",
+                                callback_data=Dialogo("loc/fi", sala.id).serialize(),
+                            ),
+                            InlineKeyboardButton(
+                                "Esclusa -> OUTPUT",
+                                callback_data=Dialogo("loc/fo", sala.id).serialize(),
+                            ),
+                        ]
+                    )
+                else:
+                    botones.append(
+                        [
+                            InlineKeyboardButton(
+                                "Esclusa -> NULL",
+                                callback_data=Dialogo("loc/fn", sala.id).serialize(),
+                            )
+                        ]
+                    )
+        if special_closure_enablement:
+            botones_basicos: list[InlineKeyboardButton] = []
+            if user.avatar != None and user.avatar.sala != None and sala.id == user.avatar.sala.id:
+                botones_basicos.append(
+                    InlineKeyboardButton(
+                        "Salir", callback_data=Dialogo("loc/e", sala.id).serialize()
+                    )
+                )
+            elif (
+                esta_encerrado == False
+                and (sala.is_puerta_abierta or tiene_permiso_acceso)
+                and sala.ocupantes < sala.aforo
+            ):
+                botones_basicos.append(
+                    InlineKeyboardButton(
+                        "Entrar",
+                        callback_data=Dialogo("loc/i", sala.id).serialize(),
+                    )
+                )
+            if esta_encerrado == False and tiene_permiso_acceso and "autocerrado" not in sala.atributos:
+                if sala.is_puerta_abierta:
+                    botones_basicos.append(InlineKeyboardButton('Cerrar Puerta', callback_data=Dialogo('loc/c', sala.id).serialize()))
+                elif special_closure_lock is False:
+                    botones_basicos.append(
+                        InlineKeyboardButton(
+                            "Abrir Puerta",
+                            callback_data=Dialogo("loc/o", sala.id).serialize(),
+                        )
+                    )
+            if len(botones_basicos) > 0:
+                botones.append(botones_basicos)
+
+        botones.append(
+            [
+                InlineKeyboardButton(
+                    "Cerrar Dialogo",
+                    callback_data=Dialogo("loc/x", sala.id).serialize(),
+                )
+            ]
+        )
 
     return [
-        state.txts.build_text(consts.TXT_SCAN_RETO, {
-            'nombre_reto': reto.nombre,
-            'text_activo': text_activo,
-            'descripcion_reto': reto.descripcion,
-            'extra': f"Interacción finalizada <i>{time.strftime('%H:%M:%S')}</i>",
-        }),
-        None
+        state.txts.build_text(
+            consts.TXT_SCAN_SALA,
+            {
+                "nombre_sala": sala.nombre,
+                "ocupantes": sala.ocupantes,
+                "aforo_sala": sala.aforo,
+                "estado": sala.estado,
+                "estado_puerta": "Abierta" if sala.is_puerta_abierta else "Cerrada",
+                "tiene_permiso": "🟢" if tiene_permiso_acceso else "🛑",
+                "estado_especial": estado_especial,
+                "descripcion_sala": sala.descripcion,
+                "extra": f"{extra}{inner_extra}<i>{time.strftime('%H:%M:%S')}</i>",
+            },
+        ),
+        (InlineKeyboardMarkup(botones) if botones is not None else None),
     ]
+
+def _chl(state: State, user: User, reto: Reto, extra: str, haz_botones: bool):
+    markup = None
+
+    if haz_botones and reto.activo and user.avatar is not None and reto.es_capaz(user.avatar.atributos):
+        botones = [
+            [
+                InlineKeyboardButton(
+                    "Intentar",
+                    callback_data=json.dumps(Dialogo("chl/i", reto.id).to_tuple()),
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    "Cerrar",
+                    callback_data=json.dumps(Dialogo("chl/x", reto.id).to_tuple()),
+                )
+            ],
+        ]
+        markup = InlineKeyboardMarkup(botones)
+
+    text_activo = "" if reto.activo else "\nAhora mismo no se puede hacer nada aquí"
+
+    return [
+        state.txts.build_text(
+            consts.TXT_SCAN_RETO,
+            {
+                "nombre_reto": reto.nombre,
+                "text_activo": text_activo,
+                "descripcion_reto": reto.descripcion,
+                "extra": f"{extra}<i>{time.strftime('%H:%M:%S')}</i>",
+            },
+        ),
+        markup,
+    ]
+
+def _esta_usuario_encerrado(user: User):
+    if user.avatar is None:
+        return False
+    if user.avatar.sala is None:
+        return False
+    sala = user.avatar.sala
+    if 'sellable' in sala.atributos and sala.datos['sellado']:
+        return True
+    if 'esclusa' in sala.atributos:
+        return sala.datos['modo_esclusa'] != 'INPUT'
+    return False

@@ -72,19 +72,23 @@ class Sala:
     estado: int = 100
     permisos: list[str] = []
     atributos: list[str] = []
+    """
+        esclusa, sellable, autocerrado
+    """
     datos: dict[str, any] = dict()
+    """
+        sellado: bool\\
+        permisos_sellado: str[]\\
+        modo_esclusa: "INPUT" | "OUTPUT" | "NULL"\\
+        permisos_esclusa: str[]
+    """
 
     def __init__(self, nombre: str, aforo: int):
         self.nombre = nombre
         self.aforo = aforo
 
     def tiene_permiso(self, permisos: list[str]):
-        if 'admin' in permisos:
-            return True
-        for requisito in self.permisos:
-            if requisito not in permisos:
-                return False
-        return True
+        return tiene_permisos(self.permisos, permisos)
 
     def to_dict(self):
         return {
@@ -98,7 +102,7 @@ class Sala:
             'atributos': self.atributos,
             'datos': self.datos,
         }
-    
+
     def _asegurar_datos_atributos(self):
         if ATR_SELLABLE in self.atributos:
             self.datos['sellado'] = self.datos.get('sellado', False)
@@ -121,6 +125,16 @@ class Sala:
         out_sala.datos = fuente.get('datos', out_sala.datos)
         out_sala._asegurar_datos_atributos()
         return out_sala
+
+
+def tiene_permisos(requerido: list[str], existente: list[str]):
+    if 'admin' in requerido:
+        return True
+    for requisito in requerido:
+        if requisito not in existente:
+            return False
+    return True
+
 
 class Arca:
     # Estado general
