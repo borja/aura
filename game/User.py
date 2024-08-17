@@ -26,7 +26,7 @@ class User:
                 user.avatar = tripulante
                 break
         return user
-    
+
     def to_dict(self):
         avatar: None | int = None
         if self.avatar != None:
@@ -36,9 +36,9 @@ class User:
             'chatId': self.chatId,
             'avatar': avatar,
         }
-    
+
     def describe(self):
         if self.avatar == None:
-            return f"U({self.id}) [sin rol]"
-        
-        return f"U({self.id}) [{self.avatar.name}, de {self.avatar.cuerpo}]"
+            return f"U({self.id})"
+
+        return f"{self.avatar.name}, de {self.avatar.cuerpo} [{self.avatar.id}, U({self.id})]"

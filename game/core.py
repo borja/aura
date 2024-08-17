@@ -126,6 +126,37 @@ def say(state: State, user: User, command_text: str):
             print(colored(f" ⚠️ - Invalid information request: {command}",'yellow'))
             return f"No existe información registrada para la propiedad: {command}"
 
+
+_task_reg = re.compile('^([a-z0-9_]+) "((?:[^"]|(?:""))+)"', re.IGNORECASE)
+async def orden(state: State, user: User, command_text: str):
+    if user.avatar is None:
+        return 'Registrate en la terminar antes de intentar asignar permisos'
+    if 'admin' not in user.avatar.permisos and 'taskmaster' not in user.avatar.permisos:
+        return 'No tienes permiso para designar tareas'
+    out_mensaje: list[str] = []
+    clean_command = command_text.strip()
+    lineas = clean_command.split('\n')
+    for linea in lineas:
+        mat = _task_reg.match(linea)
+        if mat is None:
+            out_mensaje.append(f"Linea no válida: '{linea}'")
+            continue
+        user_id = linea[0:mat.end(1)].lower()
+        tarea = linea[mat.start(2):mat.end(2)]
+
+        t_pj = next((t_pj for t_pj in state.game.crew if t_pj.id.lower() == user_id), None)
+        if t_pj is None:
+            out_mensaje.append(f"Tripulante no válido: '{user_id}'")
+            continue
+
+        t_pj.asignacion = tarea
+
+        t_user = next((t_user for t_user in state.game.users if t_user.avatar is not None and t_user.avatar.id == t_pj.id), None)
+        if t_user is not None and t_user.chatId != -1:
+            await state.bot.send_message(t_user.chatId, f"Se te ha asignado una tarea: {tarea}", parse_mode=ParseMode.HTML)
+
+    return 'Tareas designadas' if len(out_mensaje) < 1 else '\n'.join( out_mensaje)
+
 async def scan(state: State, user: User, command_text: str) -> tuple[str, Optional[InlineKeyboardMarkup]]:
     re_match = re.search("^[^ ]+", command_text.lower())
     command = re_match[0]
@@ -133,13 +164,10 @@ async def scan(state: State, user: User, command_text: str) -> tuple[str, Option
 
     match command:
         case 'crew' | 'tripulante':
-            print(colored(f" 🔎 {user.describe()} SCANned crew command: {command} received, with arg: {args[0]}",'blue'))
             return await keyboard_interaction(state, user, Dialogo('mem', args[0]))
         case 'room' | 'sala':
-            print(colored(f" 🔎 {user.describe()} SCANned room command: {command} received, with arg: {args[0]}",'blue'))
             return await keyboard_interaction(state, user, Dialogo('loc', args[0]))
         case 'test' | 'analiza':
-            print(colored(f" 🔎 {user.describe()} SCANned trial command: {command} received, with arg: {args[0]}",'blue'))
             return await keyboard_interaction(state, user, Dialogo('chl', args[0]))
         case _:
             print(colored(f" ⚠️ - {user.describe()} SCANned unexpected element: {command}",'yellow'))
@@ -205,14 +233,36 @@ async def enviar_mensaje(state: State, user: User, command_text: str) -> tuple[s
     await state.bot.send_message(target_user.chatId, mensaje, parse_mode=ParseMode.HTML)
     return [f"Mensaje transmitido a {target_user.avatar.name}", None]
 
+async def godspeak(state: State, user: User, command_text: str):
+    if user.avatar == None or 'god' not in user.avatar.permisos:
+        print(colored(f" ⚠️ - {user.describe()} has tried to godspeak",'yellow'))
+        return ["No tienes permisos para transmitir tus pensamientos a otras personas, check your privileges, you damn psychic", None]
+    
+    re_match = re.search("^[^ ]+", command_text.lower())
+    avatar_id = re_match[0]
+    mensaje_interno = command_text[re_match.end(0)+1:]
+    mensaje = mensaje_interno
 
-def controlar(state: State, user: User) -> tuple[str, Optional[InlineKeyboardMarkup]]:
+    if avatar_id == '?':
+        user.outgoing_msg = mensaje
+        return await keyboard_interaction(state, user, Dialogo('msg', 0))
+
+    avatar_id = avatar_id.lower()
+    target_user = next((g_user for g_user in state.game.users if g_user.avatar != None and g_user.avatar.id.lower() == avatar_id), None)
+    if target_user == None:
+        return ["No se ha podido encontrar el tripulante", None]
+    if target_user.chatId == -1:
+        return ["El tripulante no se ha registrado en una terminal válida", None]
+
+    await state.bot.send_message(target_user.chatId, mensaje, parse_mode=ParseMode.HTML)
+    return [f"Se le ha susurrado a {target_user.avatar.name}", None]
+
+async def controlar(state: State, user: User) -> tuple[str, Optional[InlineKeyboardMarkup]]:
     if user.avatar == None or 'god' not in user.avatar.permisos:
         print(colored(f" ⚠️ - {user.describe()} has tried to take control",'yellow'))
         return [f"Lo siento, no puedo dejarte hacer eso", None]
     print(colored(f" ⚠️ - {user.describe()} has taken control",'blue'))
-    return keyboard_interaction(state, user, Dialogo('ctl'))
-
+    return await keyboard_interaction(state, user, Dialogo('ctl'))
 
 async def keyboard_interaction(state: State, user: User, dialog: Dialogo) -> tuple[str, Optional[InlineKeyboardMarkup]]:
     match dialog.ruta:

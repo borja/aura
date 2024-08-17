@@ -15,7 +15,7 @@ from infra.Loader import Loader
 from infra.Settings import Settings
 from infra.State import State
 from infra.Texts import Texts
-from game.core import broadcast, controlar, enviar_mensaje, keyboard_interaction, register, respuesta_dialogo_textual, say, run, help, start, scan
+from game.core import broadcast, controlar, enviar_mensaje, godspeak, keyboard_interaction, orden, register, respuesta_dialogo_textual, say, run, help, start, scan
 from game.Arca import Arca
 
 class Telegram:
@@ -74,7 +74,7 @@ async def handle_message(state: State, update: Update, context: ContextTypes.DEF
 
     if user.dialogo != None:
         clean_text = text.strip()
-        print(colored(f" ⚠️ - {user.describe()} has input dialog to modal {user.dialogo.tipo}/{user.dialogo.ruta}",'green'))
+        print(colored(f" ⚠️ - {user.describe()} has input dialog to modal {user.dialogo.tipo}/{user.dialogo.ruta}",'blue'))
         await update.message.reply_text(respuesta_dialogo_textual(state, user, user.dialogo, clean_text), parse_mode=ParseMode.HTML)
         return
 
@@ -107,6 +107,9 @@ async def handle_text_command(state: State, user: User, update: Update, context:
         case 'msg' | 'mensaje' | 'susurro' | '':
             respuesta = await enviar_mensaje(state, user, rest)
             await update.message.reply_text(respuesta[0], reply_markup=respuesta[1], parse_mode=ParseMode.HTML)
+        case 'godspeak':
+            respuesta = await godspeak(state, user, rest)
+            await update.message.reply_text(respuesta[0], reply_markup=respuesta[1], parse_mode=ParseMode.HTML)
         case 'haz' | 'ejecuta' | 'orden' | 'x':
             await update.message.reply_text(run(state,user,rest), parse_mode=ParseMode.HTML)
         case 'dime' | 'di' | 'imprime' | 'informa' | 'muestra' | 'i' | 'y':
@@ -119,8 +122,10 @@ async def handle_text_command(state: State, user: User, update: Update, context:
                 'nombre_tripulante': 'invitado' if user.avatar == None else user.avatar.name,
             }), parse_mode=ParseMode.HTML)
         case 'controlar':
-            result = controlar(state, user)
+            result = await controlar(state, user)
             await update.message.reply_text(result[0], reply_markup=result[1], parse_mode=ParseMode.HTML)
+        case 'tarea' | 'atarear' | 'asignar':
+            await update.message.reply_text(await orden(state, user, rest), parse_mode=ParseMode.HTML)
         case _:
             print(colored(f" ⚠️ - {user.describe()} has executed invalid command request: {command}",'yellow'))
             await update.message.reply_text(f"No existe el comando \"{command}\"")

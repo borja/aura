@@ -51,7 +51,7 @@
             "name": "Carlos",
             "cuerpo": "Militar",
             "rango": "Almirante",
-            "permisos": ["operador_esclusa","almirante","militar","medico","broadcast"],
+            "permisos": ["operador_esclusa","almirante","militar","medico","broadcast","taskmaster"],
             "vida": 3,
             "prestigio": 4,
             "is_sano": true,
