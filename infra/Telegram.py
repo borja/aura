@@ -98,7 +98,7 @@ async def handle_message(state: State, update: Update, context: ContextTypes.DEF
 
 async def handle_text_command(state: State, user: User, update: Update, context: ContextTypes.DEFAULT_TYPE, command: str, rest: str):
     match command:
-        case 'register' | 'reg' | 'login':
+        case "register" | "reg" | "login":
             await update.message.reply_text(register(state, user, rest))
         case 'ayuda' | 'help' | 'h':
             await update.message.reply_text(help(state,user), parse_mode=ParseMode.HTML)
@@ -126,6 +126,8 @@ async def handle_text_command(state: State, user: User, update: Update, context:
             await update.message.reply_text(result[0], reply_markup=result[1], parse_mode=ParseMode.HTML)
         case 'tarea' | 'atarear' | 'asignar':
             await update.message.reply_text(await orden(state, user, rest), parse_mode=ParseMode.HTML)
+        case 'chat' | 'pregunta' | 'hablar' | 'ia':
+            print(colored(f"⁇⁇⁇ {user.describe()}, te ha preguntado lo siguiente: {rest}", "green"))
         case _:
             print(colored(f" ⚠️ - {user.describe()} has executed invalid command request: {command}",'yellow'))
             await update.message.reply_text(f"No existe el comando \"{command}\"")
